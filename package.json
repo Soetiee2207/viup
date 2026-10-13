@@ -1,0 +1,21 @@
+{
+  "name": "viup",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "worker"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n web,worker -c cyan,magenta \"npm run dev -w @viup/web\" \"npm run dev -w @viup/worker\"",
+    "db:generate": "npm run db:generate -w @viup/core",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "concurrently": "10.0.6",
+    "typescript": "7.0.2"
+  }
+}

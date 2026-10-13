@@ -1,0 +1,13 @@
+{
+  "name": "@viup/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.ts",
+    "start": "node src/index.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@viup/core": "*"
+  }
+}

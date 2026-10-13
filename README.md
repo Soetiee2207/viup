@@ -39,7 +39,18 @@ Crawl & Trend ─▶ Lọc / chọn ý tưởng ─▶ Viết kịch bản (LLM)
 
 Thay vì tạo cả video bằng AI (tốn credits, nhân vật khó nhất quán), viup dùng **nhân vật 2D vẽ một lần** bằng Gemini (mặt để trống) và **code tự làm chuyển động**: thở, chớp mắt, miệng nhép theo độ to giọng đọc, nảy/nhảy/lắc theo cảm xúc từng câu. Chi phí mỗi video ≈ 0đ, tự động hoá hoàn toàn, không giới hạn số lượng.
 
-👉 Bản thử nghiệm: [`prototype/`](prototype/) — xem [prototype/README.md](prototype/README.md) và [prompt Gemini](prototype/GEMINI_PROMPTS.md).
+👉 Mascot: **chú cua Cự Giải**. Engine video: [`packages/video/`](packages/video/) — prompt vẽ nhân vật: [docs/GEMINI_PROMPTS.md](docs/GEMINI_PROMPTS.md).
+
+## Bắt đầu
+
+Cần Node.js ≥ 23, [uv](https://docs.astral.sh/uv/), ffmpeg.
+
+```bash
+npm install
+npm run dev     # dashboard http://localhost:3210 + worker
+```
+
+Kế hoạch chi tiết: [docs/PLAN.md](docs/PLAN.md) · Đăng ký API: [docs/SETUP_APIS.md](docs/SETUP_APIS.md)
 
 ## Tech stack đề xuất (chưa chốt)
 
@@ -51,6 +62,7 @@ Thay vì tạo cả video bằng AI (tốn credits, nhân vật khó nhất quá
 ## Roadmap
 
 - [x] **Prototype** – kịch bản → giọng đọc → nhân vật 2D hoạt hình + phụ đề → MP4.
+- [x] **Phase 0** – Monorepo, SQLite + hàng đợi job, worker, dashboard.
 - [ ] **Phase 1** – Crawl trend + sinh kịch bản, hiển thị và chỉnh sửa trên webapp.
 - [ ] **Phase 2** – Nhiều nhân vật/cảnh, nhạc nền, phụ đề khớp từng từ, render từ webapp.
 - [ ] **Phase 3** – Tuỳ chọn chèn cảnh video AI (Veo).
@@ -65,4 +77,4 @@ Thay vì tạo cả video bằng AI (tốn credits, nhân vật khó nhất quá
 
 ## Trạng thái
 
-🚧 Đang ở giai đoạn thử nghiệm — đã có prototype dựng video hoạt hình 2D.
+🚧 Đang phát triển — xong Phase 0 (khung dự án), tiếp theo Phase 1 (video engine v2).

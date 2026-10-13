@@ -10,9 +10,9 @@ Mỗi dòng trong script.txt là một câu thoại. Có thể gắn cảm xúc 
     [buon] Tiếc là...
 Dòng trống và dòng bắt đầu bằng # bị bỏ qua.
 
-Đầu ra:
-    public/voice.wav      - toàn bộ giọng đọc, nối liền
-    public/manifest.json  - thời điểm từng câu + độ to theo từng khung hình (để nhép miệng)
+Đầu ra (trong thư mục --out):
+    voice.wav      - toàn bộ giọng đọc, nối liền
+    manifest.json  - thời điểm từng câu + độ to theo từng khung hình (để nhép miệng)
 """
 
 import argparse
@@ -32,7 +32,6 @@ FPS = 30
 SAMPLE_RATE = 24000
 GAP_SECONDS = 0.25
 EMOTIONS = {"vui", "buon", "ngacnhien", "binhthuong"}
-ROOT = Path(__file__).resolve().parent.parent
 
 
 def parse_script(path: Path) -> list[dict]:
@@ -88,6 +87,7 @@ def envelope(pcm: bytes) -> list[float]:
 async def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("script", type=Path)
+    parser.add_argument("--out", type=Path, required=True, help="thư mục ghi voice.wav + manifest.json")
     parser.add_argument("--voice", default="vi-VN-HoaiMyNeural", help="hoặc vi-VN-NamMinhNeural (giọng nam)")
     parser.add_argument("--rate", default="+10%", help="tốc độ đọc, vd +0%%, +15%%")
     args = parser.parse_args()
@@ -105,8 +105,8 @@ async def main() -> None:
             line["end"] = round(len(pcm) / 2 / SAMPLE_RATE, 3)
             pcm += gap
 
-    public = ROOT / "public"
-    public.mkdir(exist_ok=True)
+    public = args.out
+    public.mkdir(parents=True, exist_ok=True)
     with wave.open(str(public / "voice.wav"), "wb") as w:
         w.setnchannels(1)
         w.setsampwidth(2)
@@ -120,7 +120,7 @@ async def main() -> None:
         "envelope": envelope(bytes(pcm)),
     }
     (public / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
-    print(f"Xong: {manifest['duration']}s, {len(lines)} câu -> public/voice.wav, public/manifest.json")
+    print(f"Xong: {manifest['duration']}s, {len(lines)} câu -> {public}/voice.wav, manifest.json")
 
 
 if __name__ == "__main__":

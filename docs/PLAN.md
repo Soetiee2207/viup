@@ -27,8 +27,20 @@
 
 - Mascot chính của kênh là **một chú cua** (chủ kênh cung Cự Giải). Đây là nhận diện thương hiệu, xuất hiện trong mọi video.
 - **Thiết kế cho hoạt hình cắt ghép:** mắt nằm trên **cuống mắt**. Gemini vẽ quả cầu mắt trắng trơn, code vẽ con ngươi và chớp mắt; miệng do code vẽ trên thân. Hai **càng** là lớp ảnh riêng để code vẫy, kẹp, giơ lên.
-- Prompt vẽ nhân vật nằm trong [`prototype/GEMINI_PROMPTS.md`](../prototype/GEMINI_PROMPTS.md). Phase 1 thêm hỗ trợ lớp càng riêng.
+- Prompt vẽ nhân vật nằm trong [`docs/GEMINI_PROMPTS.md`](GEMINI_PROMPTS.md). Phase 1 thêm hỗ trợ lớp càng riêng.
 - Có thể thêm nhân vật phụ (sinh vật biển khác) để làm dạng hội thoại.
+
+## 1c. Chủ đề (chốt 2026-10-13)
+
+Một kênh, mascot cua, xen kẽ 2 **định dạng nội dung** (format), tỉ lệ cấu hình được:
+
+| Format | Tỉ lệ ban đầu | Ví dụ | Nguồn |
+|---|---|---|---|
+| `fun-fact` — "Cua Biết Tuốt" | 60% | "Bạch tuộc có 3 trái tim", "Vì sao mèo sợ dưa chuột?" | Wikipedia, Reddit TIL, trang khoa học phổ thông |
+| `zodiac` — cung hoàng đạo & tâm lý vui | 40% | "3 cung dễ ghen nhất", "Cự Giải khi giận sẽ…" | LLM sinh ý tưởng theo bộ khung chủ đề, không cần crawl |
+
+- Tránh: tin nóng, sức khoẻ, tài chính, chính trị, drama người thật (AI viết sai khi không có người duyệt là rủi ro lớn).
+- Format là plugin: thêm format mới (vd `quiz`) không phải sửa pipeline. Phase 7 tự điều chỉnh tỉ lệ theo hiệu quả.
 
 ---
 
@@ -77,9 +89,9 @@ viup/
 
 ## 3. Lộ trình (mỗi phase ≈ 1–2 phiên code)
 
-### Phase 0 — Khung dự án
+### Phase 0 — Khung dự án ✅ (2026-10-13)
 - Chuyển sang monorepo (npm workspaces), đưa `prototype/` vào `packages/video`.
-- SQLite + Drizzle, schema các bảng ở trên. Viết `CLAUDE.md` mô tả kiến trúc và lệnh chạy.
+- SQLite (libsql) + Drizzle, schema các bảng ở trên, hàng đợi job trong DB. Viết `CLAUDE.md` mô tả kiến trúc và lệnh chạy.
 - **Đăng ký ngay** API YouTube, TikTok, Facebook và gửi audit, vì phải chờ duyệt lâu (xem mục 4).
 - ✅ Xong khi: `npm run dev` chạy được web và worker rỗng; DB được tạo.
 

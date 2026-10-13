@@ -19,7 +19,7 @@ Yêu cầu:
 - Chỉ in ra các câu, mỗi câu một dòng, không đánh số, không giải thích.
 ```
 
-Dán kết quả vào `script.txt`, rồi chạy `npm run voice`.
+Dán kết quả vào `packages/video/script.txt`, rồi chạy `npm run voice -w @viup/video`.
 
 ---
 
@@ -68,7 +68,7 @@ Chỉ vẽ riêng chiếc càng BÊN PHẢI của chú cua này (phía bên ph�
 Tải ảnh về rồi xoá nền:
 
 ```bash
-npm run cutbg -- ~/Downloads/<ảnh>.png public/character/body.png
+uv run tools/cut_bg.py ~/Downloads/<ảnh>.png packages/video/public/character/body.png
 ```
 
 ---
@@ -88,7 +88,7 @@ Vẽ một bối cảnh nền 2D phong cách flat vector, cùng phong cách vớ
 
 ## 4. Căn mắt & miệng vào nhân vật
 
-1. `npm run studio` → mở trình duyệt.
+1. `npm run studio -w @viup/video` → mở trình duyệt.
 2. Ở bảng **Props** bên phải: đặt `characterImage` = `character/body.png` (và `backgroundImage` = `background.png` nếu có).
 3. Chỉnh `face`: toạ độ là tỉ lệ 0–1 theo ảnh nhân vật (`0.5` = chính giữa). Kéo tới khi mắt/miệng nằm đúng chỗ.
-4. Bấm **Save** để lưu thành mặc định (ghi vào `src/Root.tsx`), rồi `npm run render`.
+4. Bấm **Save** để lưu thành mặc định (ghi vào `src/Root.tsx`), rồi `npm run render -w @viup/video`.

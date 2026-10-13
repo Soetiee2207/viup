@@ -1,10 +1,10 @@
 {
-  "name": "viup-prototype",
+  "name": "@viup/video",
   "scripts": {
     "studio": "remotion studio",
     "render": "remotion render Short out/short.mp4",
-    "voice": "uv run tools/make_voice.py script.txt",
-    "cutbg": "uv run tools/cut_bg.py"
+    "voice": "uv run ../../tools/tts/make_voice.py script.txt --out public",
+    "typecheck": "tsc -p ."
   },
   "type": "module",
   "dependencies": {
