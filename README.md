@@ -20,9 +20,10 @@ Crawl & Trend ─▶ Lọc / chọn ý tưởng ─▶ Viết kịch bản (LLM)
 |---|---|---|
 | **Nguồn dữ liệu** | Tìm chủ đề đang hot, thu thập thông tin | Google Trends, YouTube Data API, Reddit, RSS/báo, TikTok Creative Center |
 | **Kịch bản** | Viết script có hook 3 giây đầu, thân bài, CTA; sinh tiêu đề, mô tả, hashtag | Gemini API |
-| **Giọng đọc** | Chuyển kịch bản thành voice-over (có tiếng Việt) | Gemini TTS / Google Cloud TTS, ElevenLabs |
-| **Hình ảnh / Video** | Tạo cảnh minh hoạ, nhân vật nhất quán giữa các video | Veo (video), Imagen / Gemini image; fallback ảnh stock + hiệu ứng Ken Burns |
-| **Dựng video** | Ghép cảnh, phụ đề tự động, nhạc nền, xuất 9:16 | FFmpeg, MoviePy, Whisper (căn phụ đề) |
+| **Giọng đọc** | Chuyển kịch bản thành voice-over (có tiếng Việt) | edge-tts (miễn phí); sau này Gemini TTS / ElevenLabs |
+| **Nhân vật 2D** | Nhân vật/sự vật 2D vẽ một lần bằng Gemini, tái sử dụng cho mọi video (luôn nhất quán) | Gemini image (gói Pro) |
+| **Hoạt hình & dựng video** | Chớp mắt, nhép miệng theo giọng, biểu cảm, chuyển động; phụ đề; xuất 9:16 | Remotion (React → MP4), FFmpeg |
+| **Video AI (tuỳ chọn)** | Thỉnh thoảng một cảnh đặc biệt | Veo / Flow (tốn credits) |
 | **Đăng bài** | Upload và lên lịch đa nền tảng | YouTube Data API, Facebook Graph API, TikTok Content Posting API |
 | **Webapp** | Dashboard quản lý ý tưởng, duyệt kịch bản, preview video, lịch đăng | xem phần Tech stack |
 
@@ -34,18 +35,25 @@ Crawl & Trend ─▶ Lọc / chọn ý tưởng ─▶ Viết kịch bản (LLM)
   - Veo / Imagen qua API được tính phí riêng theo lượng sử dụng.
 - **Chiến lược đề xuất:** MVP dùng Gemini API free tier cho kịch bản + TTS; cảnh video AI tạo thủ công trên Flow bằng gói Pro rồi đưa vào viup để dựng; khi kênh có doanh thu mới chuyển sang Veo API để tự động hoá toàn bộ.
 
+## Hướng hình ảnh: hoạt hình 2D "cắt ghép"
+
+Thay vì tạo cả video bằng AI (tốn credits, nhân vật khó nhất quán), viup dùng **nhân vật 2D vẽ một lần** bằng Gemini (mặt để trống) và **code tự làm chuyển động**: thở, chớp mắt, miệng nhép theo độ to giọng đọc, nảy/nhảy/lắc theo cảm xúc từng câu. Chi phí mỗi video ≈ 0đ, tự động hoá hoàn toàn, không giới hạn số lượng.
+
+👉 Bản thử nghiệm: [`prototype/`](prototype/) — xem [prototype/README.md](prototype/README.md) và [prompt Gemini](prototype/GEMINI_PROMPTS.md).
+
 ## Tech stack đề xuất (chưa chốt)
 
 - **Backend:** Python + FastAPI — hệ sinh thái mạnh cho crawl, AI và xử lý video (FFmpeg).
-- **Frontend:** Next.js / React.
+- **Frontend:** Next.js / React — dùng chung React với Remotion để preview video ngay trên web.
 - **Database:** SQLite cho bản đầu, chuyển sang PostgreSQL khi cần.
 - **Job queue:** background task đơn giản → Celery / RQ khi pipeline nặng hơn.
 
 ## Roadmap
 
+- [x] **Prototype** – kịch bản → giọng đọc → nhân vật 2D hoạt hình + phụ đề → MP4.
 - [ ] **Phase 1** – Crawl trend + sinh kịch bản, hiển thị và chỉnh sửa trên webapp.
-- [ ] **Phase 2** – TTS + dựng video từ ảnh/clip + phụ đề tự động.
-- [ ] **Phase 3** – Tích hợp video AI (Veo), nhân vật nhất quán.
+- [ ] **Phase 2** – Nhiều nhân vật/cảnh, nhạc nền, phụ đề khớp từng từ, render từ webapp.
+- [ ] **Phase 3** – Tuỳ chọn chèn cảnh video AI (Veo).
 - [ ] **Phase 4** – Lên lịch & tự đăng đa nền tảng, thống kê hiệu quả (view, retention).
 
 ## Lưu ý về chính sách nền tảng
@@ -57,4 +65,4 @@ Crawl & Trend ─▶ Lọc / chọn ý tưởng ─▶ Viết kịch bản (LLM)
 
 ## Trạng thái
 
-🚧 Đang ở giai đoạn nghiên cứu và thiết kế — chưa có code.
+🚧 Đang ở giai đoạn thử nghiệm — đã có prototype dựng video hoạt hình 2D.

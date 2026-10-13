@@ -1,0 +1,7 @@
+# Mỗi dòng là một câu thoại. Gắn cảm xúc ở đầu dòng: [vui] [buon] [ngacnhien] [binhthuong]
+[ngacnhien] Bạn có biết bạch tuộc có tới ba trái tim không?
+[binhthuong] Hai tim bơm máu qua mang, tim còn lại bơm máu đi khắp cơ thể.
+[vui] Và máu của chúng có màu xanh dương!
+[binhthuong] Lý do là máu bạch tuộc dùng đồng thay vì sắt để vận chuyển oxy.
+[buon] Nhưng khi bơi, trái tim chính lại ngừng đập, nên chúng rất nhanh mệt.
+[vui] Theo dõi để biết thêm nhiều điều thú vị nhé!
