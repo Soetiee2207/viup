@@ -41,6 +41,30 @@ Yêu cầu bắt buộc:
 
 Muốn thêm nhân vật khác cùng phong cách: *"Vẽ thêm một nhân vật mới cùng phong cách y hệt: …"*.
 
+### Mascot chính: chú cua Cự Giải
+
+```
+Vẽ mascot cho một kênh video ngắn: một chú cua nhỏ dễ thương, phong cách chibi flat vector 2D.
+- Thân tròn bầu, màu đỏ cam ấm, có 2 càng to tròn trịa và 6 chân ngắn.
+- Hai mắt nằm trên 2 cuống mắt ngắn dựng đứng; mỗi đầu cuống là một quả cầu TRẮNG TRƠN,
+  KHÔNG có con ngươi, KHÔNG có đồng tử.
+- Trên thân KHÔNG có miệng, KHÔNG có mũi (chỉ có 2 má hồng nhạt).
+- Nhìn thẳng chính diện, đối xứng, 2 càng giơ nhẹ sang hai bên, không che thân.
+- Viền đen đậm, màu phẳng, không đổ bóng, không gradient.
+- Nền trắng trơn hoàn toàn, không vật thể, không chữ. Khung hình vuông 1:1.
+```
+
+Khi căn mặt trong Studio: đặt `eyeLeftX/eyeRightX/eyeY` vào **giữa 2 quả cầu mắt** (code vẽ con ngươi lên đó), `mouthY` ở giữa thân.
+
+Lớp càng riêng (để code vẫy/kẹp càng — Phase 1 mới dùng tới), hỏi tiếp trong cùng cuộc trò chuyện:
+
+```
+Vẽ lại đúng chú cua này nhưng KHÔNG có 2 càng (bỏ hẳn càng, giữ nguyên mọi thứ khác, cùng góc nhìn và kích thước).
+```
+```
+Chỉ vẽ riêng chiếc càng BÊN PHẢI của chú cua này (phía bên phải người xem), cùng phong cách, nền trắng trơn.
+```
+
 Tải ảnh về rồi xoá nền:
 
 ```bash

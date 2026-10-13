@@ -23,6 +23,15 @@
 
 ---
 
+## 1b. Nhân vật chủ đạo: con cua (Cự Giải)
+
+- Mascot chính của kênh là **một chú cua** (chủ kênh cung Cự Giải). Đây là nhận diện thương hiệu, xuất hiện trong mọi video.
+- **Thiết kế cho hoạt hình cắt ghép:** mắt nằm trên **cuống mắt**. Gemini vẽ quả cầu mắt trắng trơn, code vẽ con ngươi và chớp mắt; miệng do code vẽ trên thân. Hai **càng** là lớp ảnh riêng để code vẫy, kẹp, giơ lên.
+- Prompt vẽ nhân vật nằm trong [`prototype/GEMINI_PROMPTS.md`](../prototype/GEMINI_PROMPTS.md). Phase 1 thêm hỗ trợ lớp càng riêng.
+- Có thể thêm nhân vật phụ (sinh vật biển khác) để làm dạng hội thoại.
+
+---
+
 ## 2. Kiến trúc
 
 Dùng TypeScript cho hầu hết hệ thống (chung với Remotion). Python chỉ giữ cho TTS.
