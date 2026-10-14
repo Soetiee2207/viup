@@ -16,10 +16,13 @@ Yêu cầu:
 - 5–9 câu, mỗi câu tối đa 18 từ, văn nói tự nhiên, dễ hiểu.
 - Câu cuối kêu gọi theo dõi/bình luận.
 - Đầu mỗi câu gắn đúng MỘT nhãn cảm xúc: [vui] [buon] [ngacnhien] [binhthuong]
+- Sau nhãn cảm xúc, ghi hình minh hoạ trong ngoặc nhọn bằng tên emoji tiếng Anh viết thường nối bằng gạch ngang
+  (vd octopus, red-heart x3, water-wave) và một NHÃN chữ ngắn viết hoa sau dấu |, vd:
+  [ngacnhien] {octopus, red-heart x3 | 3 TRÁI TIM} Bạch tuộc có 3 trái tim!
 - Chỉ in ra các câu, mỗi câu một dòng, không đánh số, không giải thích.
 ```
 
-Dán kết quả vào `packages/video/script.txt`, rồi chạy `npm run voice -w @viup/video`.
+Dán kết quả vào `packages/video/script.txt`, rồi chạy `npm run voice -w @viup/video`. Nếu báo icon không tồn tại, tìm tên đúng bằng `npm run icons -w @viup/video -- search <từ khoá>`.
 
 ---
 

@@ -9,5 +9,5 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["src", "remotion.config.ts"]
+  "include": ["src", "scripts", "remotion.config.ts"]
 }

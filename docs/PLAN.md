@@ -101,7 +101,7 @@ viup/
 - Quay video demo để nộp audit (xem docs/SETUP_APIS.md).
 - ✅ Xong khi: upload thành công trên cả 2 nền tảng ở chế độ riêng tư/nháp.
 
-### Phase 1 — Video engine v2 (từ VideoSpec ra MP4)
+### Phase 1 — Video engine v2 (từ VideoSpec ra MP4) — 🚧 đã có bố cục dẫn chương trình + icon minh hoạ
 - Phụ đề khớp **từng từ** nhờ WordBoundary của edge-tts.
 - **Props:** icon xuất hiện theo câu với các hiệu ứng có sẵn (pop, slide, shake, đếm số, mũi tên chỉ).
 - Nhiều nhân vật (hội thoại 2 người), đổi nền theo đoạn, nhạc nền tự giảm âm lượng khi có lời (ducking).

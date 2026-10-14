@@ -1,7 +1,8 @@
-# Mỗi dòng là một câu thoại. Gắn cảm xúc ở đầu dòng: [vui] [buon] [ngacnhien] [binhthuong]
-[ngacnhien] Bạn có biết bạch tuộc có tới ba trái tim không?
-[binhthuong] Hai tim bơm máu qua mang, tim còn lại bơm máu đi khắp cơ thể.
-[vui] Và máu của chúng có màu xanh dương!
-[binhthuong] Lý do là máu bạch tuộc dùng đồng thay vì sắt để vận chuyển oxy.
-[buon] Nhưng khi bơi, trái tim chính lại ngừng đập, nên chúng rất nhanh mệt.
-[vui] Theo dõi để biết thêm nhiều điều thú vị nhé!
+# Mỗi dòng là một câu thoại: [cảm xúc] {icon, icon xN | NHÃN} lời thoại
+# Cảm xúc: [vui] [buon] [ngacnhien] [binhthuong] — tìm tên icon: npm run icons -- search <từ khoá>
+[ngacnhien] {octopus, anatomical-heart x3 | 3 TRÁI TIM?} Bạn có biết bạch tuộc có tới ba trái tim không?
+[binhthuong] {anatomical-heart x2, lungs | 2 TIM CHO MANG} Hai tim bơm máu qua mang, tim còn lại bơm máu đi khắp cơ thể.
+[vui] {blue-heart, droplet | MÁU XANH DƯƠNG} Và máu của chúng có màu xanh dương!
+[binhthuong] {coin, atom-symbol | ĐỒNG THAY VÌ SẮT} Lý do là máu bạch tuộc dùng đồng thay vì sắt để vận chuyển oxy.
+[buon] {water-wave, tired-face | BƠI LÀ MỆT} Nhưng khi bơi, trái tim chính lại ngừng đập, nên chúng rất nhanh mệt.
+[vui] {crab, bell | THEO DÕI CRAB VIBE} Theo dõi Crab vibe để biết thêm nhiều điều thú vị nhé!

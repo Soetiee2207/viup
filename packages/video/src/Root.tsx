@@ -12,7 +12,7 @@ export const RemotionRoot: React.FC = () => (
 		defaultProps={{
 			// Mascot cua Cự Giải (ảnh vẽ bằng Gemini, xoá nền bằng tools/cut_bg.py). Để '' = nhân vật mẫu
 			characterImage: 'character/crab.png',
-			characterWidth: 780,
+			characterWidth: 500,
 			face: {
 				eyeLeftX: 0.394,
 				eyeRightX: 0.607,

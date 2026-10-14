@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Audio, Img, random, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {z} from 'zod';
 import {Character} from './Character';
+import {Stage} from './Stage';
 import {Subtitle} from './Subtitle';
 import type {Manifest} from './types';
 
@@ -64,6 +65,10 @@ export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
 	const index = Math.max(0, lines.findLastIndex((l) => l.start <= t));
 	const line = lines[index];
 	const lineFrame = Math.max(0, frame - Math.round(line.start * fps));
+	// Câu không khai báo hình thì giữ hình của câu gần nhất phía trước
+	const visualIndex = lines.findLastIndex((l, i) => i <= index && l.props.length > 0);
+	const visual = visualIndex >= 0 ? lines[visualIndex] : null;
+	const visualFrame = visual ? Math.max(0, frame - Math.round(visual.start * fps)) : 0;
 	// Làm mượt độ to giọng để miệng không giật
 	const env = manifest.envelope;
 	const talk = ((env[frame - 1] ?? 0) + (env[frame] ?? 0) * 2 + (env[frame + 1] ?? 0)) / 4;
@@ -80,7 +85,9 @@ export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
 			) : (
 				<Bubbles />
 			)}
-			<AbsoluteFill style={{alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 760}}>
+			{visual && <Stage key={visualIndex} line={visual} visualFrame={visualFrame} />}
+			{/* Cua dẫn chương trình ở dưới, chừa vùng chú thích/nút của TikTok/Shorts */}
+			<AbsoluteFill style={{alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 200}}>
 				<Character
 					image={p.characterImage}
 					width={p.characterWidth}
@@ -90,8 +97,7 @@ export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
 					lineFrame={lineFrame}
 				/>
 			</AbsoluteFill>
-			{/* Phụ đề nằm trên vùng nút bấm của TikTok/Shorts ở đáy màn hình */}
-			<div style={{position: 'absolute', top: 1270, left: 70, right: 70}}>
+			<div style={{position: 'absolute', top: 905, left: 50, right: 50}}>
 				<Subtitle key={index} line={line} lineFrame={lineFrame} />
 			</div>
 			<Audio src={staticFile('voice.wav')} />

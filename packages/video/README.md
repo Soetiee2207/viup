@@ -1,6 +1,6 @@
 # @viup/video — engine video Short hoạt hình 2D
 
-Bản thử pipeline: **kịch bản → giọng đọc → nhân vật 2D chớp mắt, nhép miệng theo giọng, đổi biểu cảm → phụ đề → MP4 1080×1920**.
+Bố cục "người dẫn chương trình": **bảng minh hoạ** (icon Fluent Emoji Flat, MIT) ở trên, **phụ đề** ở giữa, **chú cua** dẫn chuyện ở dưới (chớp mắt, nhép miệng theo giọng, đổi biểu cảm). Xuất MP4 1080×1920.
 
 Chi phí 0đ ngoài gói Google AI Pro:
 
@@ -29,7 +29,9 @@ Chưa có ảnh nhân vật thì video dùng nhân vật mẫu (bạch tuộc t�
 ## Cấu trúc
 
 ```
-script.txt            kịch bản, mỗi dòng một câu, có nhãn [vui] [buon] [ngacnhien] [binhthuong]
+script.txt            kịch bản: [cảm xúc] {icon, icon xN | NHÃN} lời thoại
+scripts/icons.ts      tìm icon (npm run icons -- search tim) + trích icon dùng trong video
+src/Stage.tsx         bảng minh hoạ: icon bật vào, lơ lửng, nhãn chữ to
 ../../tools/tts/make_voice.py   tạo giọng đọc + thời điểm từng câu + độ to từng khung hình
 ../../tools/cut_bg.py           xoá nền trắng của ảnh nhân vật từ Gemini
 src/Short.tsx         bố cục video, nền, tuỳ chỉnh (props)
@@ -41,4 +43,4 @@ src/Subtitle.tsx      phụ đề tô vàng từ đang đọc
 
 - Từ đang đọc trên phụ đề được **ước lượng** theo số ký tự, chưa khớp tuyệt đối.
 - Miệng nhép theo **độ to** giọng (mở/đóng), chưa theo khẩu hình từng âm.
-- Một nhân vật, một cảnh cho cả video; chưa có nhạc nền.
+- Một nhân vật; chưa có nhạc nền; icon minh hoạ khai báo tay trong script.txt (Phase 2 do AI chọn).

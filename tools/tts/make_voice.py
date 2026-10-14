@@ -8,6 +8,10 @@ Mỗi dòng trong script.txt là một câu thoại. Có thể gắn cảm xúc 
     [vui] Xin chào các bạn!
     [ngacnhien] Bạn có biết...
     [buon] Tiếc là...
+Sau cảm xúc có thể khai báo hình minh hoạ (tên icon Fluent Emoji, xN = số lượng)
+và nhãn chữ to sau dấu |:
+    [ngacnhien] {octopus, red-heart x3 | 3 TRÁI TIM} Bạch tuộc có 3 trái tim!
+Câu không khai báo hình sẽ giữ hình của câu trước.
 Dòng trống và dòng bắt đầu bằng # bị bỏ qua.
 
 Đầu ra (trong thư mục --out):
@@ -47,7 +51,16 @@ def parse_script(path: Path) -> list[dict]:
             if tag not in EMOTIONS:
                 raise SystemExit(f"Cảm xúc không hợp lệ: [{tag}] (chỉ dùng {sorted(EMOTIONS)})")
             emotion, raw = tag, m.group(2)
-        lines.append({"text": raw, "emotion": emotion})
+        props, label = [], None
+        m = re.match(r"^\{([^}]*)\}\s*(.*)$", raw)
+        if m:
+            icons, _, label = m.group(1).partition("|")
+            for item in filter(None, (x.strip() for x in icons.split(","))):
+                name, _, count = item.partition(" x")
+                props.append({"icon": name.strip(), "count": int(count or 1)})
+            label = label.strip() or None
+            raw = m.group(2)
+        lines.append({"text": raw, "emotion": emotion, "props": props, "label": label})
     if not lines:
         raise SystemExit(f"{path} không có câu thoại nào")
     return lines

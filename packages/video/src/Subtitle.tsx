@@ -22,7 +22,7 @@ export const Subtitle: React.FC<{line: Line; lineFrame: number}> = ({line, lineF
 			style={{
 				fontFamily,
 				fontWeight: 800,
-				fontSize: 68,
+				fontSize: 62,
 				lineHeight: 1.25,
 				textAlign: 'center',
 				color: 'white',
