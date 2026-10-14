@@ -114,7 +114,7 @@ async def main() -> None:
     parser.add_argument("script", type=Path)
     parser.add_argument("--out", type=Path, required=True, help="thư mục ghi voice.wav + manifest.json")
     parser.add_argument("--voice", default="vi-VN-NamMinhNeural", help="giọng nam; giọng nữ: vi-VN-HoaiMyNeural")
-    parser.add_argument("--rate", default="+10%", help="tốc độ đọc, vd +0%%, +15%%")
+    parser.add_argument("--rate", default="+16%", help="tốc độ đọc (số nguyên), vd +0%%, +16%%")
     args = parser.parse_args()
 
     lines = parse_script(args.script)
