@@ -10,17 +10,18 @@ export const RemotionRoot: React.FC = () => (
 		schema={shortSchema}
 		// Nút "Save" trong Remotion Studio ghi đè trực tiếp các giá trị này
 		defaultProps={{
-			characterImage: '',
-			characterWidth: 620,
+			// Mascot cua Cự Giải (ảnh vẽ bằng Gemini, xoá nền bằng tools/cut_bg.py). Để '' = nhân vật mẫu
+			characterImage: 'character/crab.png',
+			characterWidth: 780,
 			face: {
-				eyeLeftX: 0.38,
-				eyeRightX: 0.62,
-				eyeY: 0.4,
-				eyeSize: 0.09,
+				eyeLeftX: 0.394,
+				eyeRightX: 0.607,
+				eyeY: 0.262,
+				eyeSize: 0.052,
 				mouthX: 0.5,
-				mouthY: 0.53,
-				mouthWidth: 0.16,
-				color: '#2b2140',
+				mouthY: 0.35,
+				mouthWidth: 0.085,
+				color: '#1d1212',
 			},
 			backgroundImage: '',
 			backgroundTop: '#7fd3f7',
