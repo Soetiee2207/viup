@@ -39,8 +39,14 @@ src/Character.tsx     nhân vật: thở, chớp mắt, nhép miệng, nảy/nh�
 src/Subtitle.tsx      phụ đề tô vàng từ đang đọc
 ```
 
+## Nhạc nền
+
+- Mặc định: `public/music/sunny-reef.mp3`, **tự tổng hợp bằng code**, nên bản quyền thuộc kênh và không dính Content ID. Tạo bản khác: `uv run tools/music/make_loop.py packages/video/public/music/<tên>.mp3 --seed 7 --bpm 110 --key D`.
+- Muốn nhạc hay hơn: tải bài từ **YouTube Audio Library** (studio.youtube.com → Thư viện âm thanh, lọc *Không yêu cầu ghi công*), bỏ vào `public/music/`, rồi đặt prop `music`.
+- Nhạc tự **giảm khi cua nói** (ducking), có fade-in và fade-out; chỉnh độ to bằng prop `musicVolume`.
+
 ## Giới hạn hiện tại
 
 - Từ đang đọc trên phụ đề được **ước lượng** theo số ký tự, chưa khớp tuyệt đối.
 - Miệng nhép theo **độ to** giọng (mở/đóng), chưa theo khẩu hình từng âm.
-- Một nhân vật; chưa có nhạc nền; icon minh hoạ khai báo tay trong script.txt (Phase 2 do AI chọn).
+- Một nhân vật; icon minh hoạ khai báo tay trong script.txt (Phase 2 do AI chọn).

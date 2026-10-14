@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Img, random, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Audio, Img, interpolate, random, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {z} from 'zod';
 import {Character} from './Character';
 import {Stage} from './Stage';
@@ -21,6 +21,8 @@ export const shortSchema = z.object({
 		color: z.string(),
 	}),
 	backgroundImage: z.string().describe('Ảnh nền 9:16 trong public/, vd background.png — để trống = nền màu'),
+	music: z.string().describe('Nhạc nền trong public/, vd music/sunny-reef.mp3 — để trống = không nhạc'),
+	musicVolume: z.number().min(0).max(1),
 	backgroundTop: z.string(),
 	backgroundBottom: z.string(),
 });
@@ -53,6 +55,19 @@ const Bubbles: React.FC = () => {
 			})}
 		</>
 	);
+};
+
+// Nhạc nền tự nhỏ lại khi cua nói (ducking), fade-in đầu và fade-out cuối video
+const musicVolume = (frame: number, manifest: Manifest, base: number, total: number) => {
+	const {envelope, fps} = manifest;
+	let talking = 0;
+	for (let i = frame - 6; i <= frame + 6; i++) talking = Math.max(talking, envelope[i] ?? 0);
+	const duck = interpolate(talking, [0.05, 0.3], [1, 0.45], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const fade = Math.min(
+		interpolate(frame, [0, fps * 0.5], [0, 1], {extrapolateRight: 'clamp'}),
+		interpolate(frame, [total - fps * 1.2, total], [1, 0], {extrapolateLeft: 'clamp'}),
+	);
+	return base * duck * fade;
 };
 
 export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
@@ -101,6 +116,13 @@ export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
 				<Subtitle key={index} line={line} lineFrame={lineFrame} />
 			</div>
 			<Audio src={staticFile('voice.wav')} />
+			{p.music && (
+				<Audio
+					src={staticFile(p.music)}
+					loop
+					volume={(f) => musicVolume(f, manifest, p.musicVolume, durationInFrames)}
+				/>
+			)}
 		</AbsoluteFill>
 	);
 };

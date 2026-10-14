@@ -24,6 +24,9 @@ export const RemotionRoot: React.FC = () => (
 				color: '#1d1212',
 			},
 			backgroundImage: '',
+			// Nhạc tự tổng hợp bằng tools/music/make_loop.py (không dính bản quyền)
+			music: 'music/sunny-reef.mp3',
+			musicVolume: 0.45,
 			backgroundTop: '#7fd3f7',
 			backgroundBottom: '#2f6fd6',
 		}}
