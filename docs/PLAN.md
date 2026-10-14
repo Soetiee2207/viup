@@ -101,13 +101,46 @@ viup/
 - Quay video demo để nộp audit (xem docs/SETUP_APIS.md).
 - ✅ Xong khi: upload thành công trên cả 2 nền tảng ở chế độ riêng tư/nháp.
 
-### Phase 1 — Video engine v2 (từ VideoSpec ra MP4) — 🚧 đã có bố cục dẫn chương trình + icon minh hoạ
-- Phụ đề khớp **từng từ** nhờ WordBoundary của edge-tts.
-- **Props:** icon xuất hiện theo câu với các hiệu ứng có sẵn (pop, slide, shake, đếm số, mũi tên chỉ).
-- Nhiều nhân vật (hội thoại 2 người), đổi nền theo đoạn, nhạc nền tự giảm âm lượng khi có lời (ducking).
-- **Thư viện asset:** `assets/characters/<tên>/{body.png, face.json}`; tìm icon theo từ khoá.
-- 3–5 **template bố cục** khác nhau, chọn ngẫu nhiên để video không trùng lặp.
-- ✅ Xong khi: `npm run render -- spec.json` ra MP4 đúng, có snapshot test cho vài khung hình.
+### Phase 1 — Video engine v2: "scene engine" (từ VideoSpec ra MP4) — 🚧 VIỆC TIẾP THEO
+
+**Đã có:** bố cục dẫn chương trình (bảng icon ở trên, phụ đề giữa, cua ở dưới), icon Fluent Emoji Flat (`scripts/icons.ts`), nhạc nền tự tổng hợp + ducking (`tools/music/make_loop.py`), giọng nam NamMinh +16%, chuẩn hoá −14 LUFS.
+
+**Vấn đề (2026-10-15):** video còn tĩnh, "chán". Mẫu tham khảo: kênh *Bé Cơm Nắm* (youtube.com/shorts/pMFI5z-52N4). Ở đó mỗi cảnh là tranh kín màn hình, cắt cảnh 1–2 giây, **đồ vật có mắt và miệng biết biểu cảm**, nền tia sáng hoặc bokeh, máy quay zoom và lắc, có nhân vật phản ứng, tiêu đề hook to ở đầu.
+
+**Mục tiêu:** đạt độ sinh động tương đương **chỉ bằng code (0đ)**. Thay hẳn `Stage.tsx` (bảng trắng) bằng scene engine:
+
+1. **Cảnh kín màn hình, cắt nhanh:** mỗi câu chia 2–3 *beat* khoảng 1–2 giây (chia theo dấu phẩy hoặc nhóm từ, căn theo WordBoundary). Chuyển cảnh: lướt ngang, zoom-punch, flash trắng, xoay nhẹ.
+2. **Đồ vật biết nói (anthropomorphic props):** gắn mắt và miệng lên icon, tái sử dụng `Eye` và `Mouth` trong `Character.tsx`. Cần bảng toạ độ mặt cho từng icon thường dùng (mặc định: giữa icon, hơi cao). Đồ vật chính của cảnh nhép miệng khi là "người nói", chớp mắt, đổi biểu cảm theo `emotion`.
+3. **Nền động theo cảm xúc:** `burst` (tia sáng xoay, khi ngạc nhiên hoặc vui), `speedlines` (nhấn mạnh), `bokeh` (bình thường), `gloom` (buồn, tối màu, mưa nhẹ). Màu theo bảng màu của từng cảm xúc.
+4. **Máy quay:** zoom chậm liên tục (Ken Burns), zoom-punch đầu beat, lắc (shake) khi `ngacnhien` hoặc có nhấn mạnh, và cận mặt cua khi phản ứng.
+5. **Cua tham gia trong cảnh, không đứng cố định:** các kiểu bố cục `crab-presents` (cua bên cạnh đồ vật), `crab-closeup` (cận mặt cua phản ứng "Hả?!", cỡ to), `object-hero` (đồ vật chiếm màn hình, cua nhỏ ở góc), `versus` (2 đồ vật đối đầu), `count` (đếm số lượng, số chạy lên).
+6. **Hiệu ứng âm thanh tự tổng hợp** (`tools/music/make_sfx.py`): whoosh (chuyển cảnh), pop (icon xuất hiện), boing (nhảy), ding (nhãn), record-scratch (bất ngờ). Đặt theo sự kiện trong timeline, cũng được duck nhẹ.
+7. **Hook 2 giây đầu:** tiêu đề to kiểu "Bạn có biết…" + câu hỏi, đập vào màn hình, cua cận mặt.
+8. **Phụ đề khớp từng từ** bằng WordBoundary của edge-tts (thay cho ước lượng theo số ký tự). Đưa mốc thời gian từng từ vào manifest.
+
+**Định dạng kịch bản mới (VideoSpec JSON):** thay `script.txt` bằng `spec.json`, Phase 2 sẽ do AI sinh ra.
+```jsonc
+{
+  "hook": "Bạn có biết?",
+  "music": "music/sunny-reef.mp3",
+  "lines": [
+    {
+      "text": "Bạch tuộc có tới ba trái tim!",
+      "emotion": "ngacnhien",
+      "beats": [
+        {"layout": "crab-closeup"},
+        {"layout": "count", "props": [{"icon": "anatomical-heart", "count": 3, "face": true}], "label": "3 TRÁI TIM", "bg": "burst"}
+      ]
+    }
+  ]
+}
+```
+- Engine tự chọn mặc định hợp lý khi beat thiếu trường (layout, bg, sfx), nên AI chỉ cần điền tối thiểu.
+- Giữ tương thích: công cụ chuyển `script.txt` cũ sang spec.
+
+**✅ Xong khi:** `npm run render -w @viup/video -- spec.json` ra MP4 có cắt cảnh 1–2 giây, đồ vật có mặt biết nhép miệng, nền động, máy quay động, SFX, hook đầu video; có lệnh render vài khung hình (still) để kiểm tra nhanh. Người dùng xem và thấy "sinh động" ngang mẫu tham khảo.
+
+**Để sau / Mức 2 (tốn phí, chỉ làm khi Mức 1 chưa đủ):** dùng Gemini API vẽ tranh cảnh riêng cho từng beat (phải tra giá ảnh API trước). Ngoài ra còn: 2 nhân vật hội thoại, thư viện asset `assets/characters/<tên>/`.
 
 ### Phase 2 — Brain (từ chủ đề ra VideoSpec)
 - Gemini API: `writeScript(idea, channel)` trả về VideoSpec, ép output theo JSON schema.
