@@ -10,7 +10,9 @@
   "scripts": {
     "dev": "concurrently -k -n web,worker -c cyan,magenta \"npm run dev -w @viup/web\" \"npm run dev -w @viup/worker\"",
     "db:generate": "npm run db:generate -w @viup/core",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "yt:auth": "node packages/publish/src/cli.ts youtube:auth",
+    "yt:upload": "node packages/publish/src/cli.ts youtube:upload"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
