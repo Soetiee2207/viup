@@ -1,0 +1,54 @@
+{
+  "hook": "Bạn có biết?",
+  "music": "music/sunny-reef.mp3",
+  "lines": [
+    {
+      "text": "Bạch tuộc có tới ba trái tim!",
+      "emotion": "ngacnhien",
+      "beats": [
+        {"layout": "crab-closeup"},
+        {"from": "ba trái tim", "layout": "count", "props": [{"icon": "anatomical-heart", "count": 3}], "label": "3 TRÁI TIM", "bg": "burst"}
+      ]
+    },
+    {
+      "text": "Hai tim bơm máu qua mang, tim còn lại bơm máu đi khắp cơ thể.",
+      "emotion": "binhthuong",
+      "beats": [
+        {"props": [{"icon": "anatomical-heart", "count": 2}, {"icon": "lungs"}], "label": "2 TIM CHO MANG"},
+        {"layout": "object-hero", "props": [{"icon": "anatomical-heart"}], "label": "1 TIM CHO CƠ THỂ"}
+      ]
+    },
+    {
+      "text": "Và máu của chúng có màu xanh dương!",
+      "emotion": "vui",
+      "beats": [
+        {"layout": "crab-presents", "props": [{"icon": "droplet"}]},
+        {"props": [{"icon": "blue-heart"}], "label": "MÁU XANH DƯƠNG"}
+      ]
+    },
+    {
+      "text": "Lý do là máu bạch tuộc dùng đồng, thay vì sắt để vận chuyển oxy.",
+      "emotion": "binhthuong",
+      "beats": [
+        {"layout": "crab-presents", "props": [{"icon": "octopus"}]},
+        {"from": "thay vì", "layout": "versus", "props": [{"icon": "coin"}, {"icon": "nut-and-bolt"}], "label": "ĐỒNG THAY VÌ SẮT"}
+      ]
+    },
+    {
+      "text": "Nhưng khi bơi, trái tim chính lại ngừng đập, nên chúng rất nhanh mệt.",
+      "emotion": "buon",
+      "beats": [
+        {"layout": "object-hero", "props": [{"icon": "water-wave"}]},
+        {"props": [{"icon": "anatomical-heart"}], "label": "TIM NGỪNG ĐẬP"},
+        {"layout": "crab-closeup"}
+      ]
+    },
+    {
+      "text": "Theo dõi Crab vibe để biết thêm nhiều điều thú vị nhé!",
+      "emotion": "vui",
+      "beats": [
+        {"layout": "crab-presents", "props": [{"icon": "bell"}], "label": "THEO DÕI CRAB VIBE"}
+      ]
+    }
+  ]
+}

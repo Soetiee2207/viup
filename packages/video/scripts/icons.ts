@@ -24,7 +24,12 @@ if (command === 'search') {
 	console.log(hits.length ? hits.join('\n') : 'Không tìm thấy icon nào');
 } else if (command === 'sync') {
 	const manifest = JSON.parse(readFileSync('public/manifest.json', 'utf8'));
-	const used = new Set<string>(manifest.lines.flatMap((l: {props?: {icon: string}[]}) => (l.props ?? []).map((p) => p.icon)));
+	type Props = {icon: string}[] | undefined;
+	const used = new Set<string>(
+		manifest.lines.flatMap((l: {props?: Props; beats?: {props?: Props}[]}) =>
+			[l.props, ...(l.beats ?? []).map((b) => b.props)].flatMap((ps) => (ps ?? []).map((p) => p.icon)),
+		),
+	);
 	const missing = [...used].filter((n) => !set.icons[n]);
 	if (missing.length) {
 		console.error(`Icon không tồn tại: ${missing.join(', ')} — tìm tên đúng bằng: node scripts/icons.ts search <từ khoá>`);

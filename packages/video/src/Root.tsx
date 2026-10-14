@@ -12,7 +12,6 @@ export const RemotionRoot: React.FC = () => (
 		defaultProps={{
 			// Mascot cua Cự Giải (ảnh vẽ bằng Gemini, xoá nền bằng tools/cut_bg.py). Để '' = nhân vật mẫu
 			characterImage: 'character/crab.png',
-			characterWidth: 500,
 			face: {
 				eyeLeftX: 0.394,
 				eyeRightX: 0.607,
@@ -23,12 +22,11 @@ export const RemotionRoot: React.FC = () => (
 				mouthWidth: 0.085,
 				color: '#1d1212',
 			},
-			backgroundImage: '',
 			// Nhạc tự tổng hợp bằng tools/music/make_loop.py (không dính bản quyền)
 			music: 'music/sunny-reef.mp3',
 			musicVolume: 0.45,
-			backgroundTop: '#7fd3f7',
-			backgroundBottom: '#2f6fd6',
+			// SFX tự tổng hợp bằng tools/music/make_sfx.py
+			sfxVolume: 0.8,
 		}}
 		width={1080}
 		height={1920}
@@ -36,7 +34,7 @@ export const RemotionRoot: React.FC = () => (
 		durationInFrames={300}
 		calculateMetadata={async ({props}) => {
 			const res = await fetch(staticFile('manifest.json'));
-			if (!res.ok) throw new Error('Chưa có public/manifest.json — hãy chạy "npm run voice" trước');
+			if (!res.ok) throw new Error('Chưa có public/manifest.json — hãy chạy "npm run voice -- spec.json" trước');
 			const manifest = (await res.json()) as Manifest;
 			return {
 				fps: manifest.fps,

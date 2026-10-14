@@ -4,25 +4,31 @@ Mẹo chung: dùng model ảnh mới nhất trong Gemini app, giữ nguyên **m�
 
 ---
 
-## 1. Kịch bản → `script.txt`
+## 1. Kịch bản → `spec.json`
+
+(Phase 2 sẽ tự động bước này qua Gemini API.)
 
 ```
-Bạn là biên kịch video ngắn (YouTube Shorts/TikTok) tiếng Việt.
+Bạn là biên kịch video ngắn (YouTube Shorts/TikTok) tiếng Việt, nhân vật dẫn chuyện là một chú cua.
 Chủ đề: <DÁN CHỦ ĐỀ / THÔNG TIN ĐÃ TÌM ĐƯỢC VÀO ĐÂY>
 
-Viết kịch bản dài 20–40 giây, do một nhân vật hoạt hình kể.
+Viết kịch bản 20–40 giây, xuất ra DUY NHẤT một JSON theo mẫu:
+{"hook": "Bạn có biết?", "lines": [
+  {"text": "Bạch tuộc có tới ba trái tim!", "emotion": "ngacnhien", "beats": [
+    {"layout": "crab-closeup"},
+    {"from": "ba trái tim", "layout": "count", "props": [{"icon": "anatomical-heart", "count": 3}], "label": "3 TRÁI TIM"}
+  ]}
+]}
 Yêu cầu:
-- Câu đầu tiên là hook gây tò mò trong 3 giây.
-- 5–9 câu, mỗi câu tối đa 18 từ, văn nói tự nhiên, dễ hiểu.
-- Câu cuối kêu gọi theo dõi/bình luận.
-- Đầu mỗi câu gắn đúng MỘT nhãn cảm xúc: [vui] [buon] [ngacnhien] [binhthuong]
-- Sau nhãn cảm xúc, ghi hình minh hoạ trong ngoặc nhọn bằng tên emoji tiếng Anh viết thường nối bằng gạch ngang
-  (vd octopus, red-heart x3, water-wave) và một NHÃN chữ ngắn viết hoa sau dấu |, vd:
-  [ngacnhien] {octopus, red-heart x3 | 3 TRÁI TIM} Bạch tuộc có 3 trái tim!
-- Chỉ in ra các câu, mỗi câu một dòng, không đánh số, không giải thích.
+- "hook": 2–4 từ gây tò mò. Câu đầu là hook trong 3 giây. 5–9 câu, mỗi câu tối đa 18 từ, văn nói tự nhiên. Câu cuối kêu gọi theo dõi.
+- "emotion" chỉ dùng: vui, buon, ngacnhien, binhthuong.
+- Mỗi câu 1–3 beat (~1,5 giây/beat). "from" = cụm từ trong câu nơi beat bắt đầu (bỏ trống ở beat đầu).
+- "layout": crab-closeup, crab-presents, object-hero, versus (chỉ khi so sánh 2 thứ), count (khi có con số).
+- "icon": tên emoji tiếng Anh viết thường nối gạch ngang (vd octopus, red-heart, water-wave).
+- "label": nhãn ngắn VIẾT HOA, tối đa 18 ký tự, không bắt buộc.
 ```
 
-Dán kết quả vào `packages/video/script.txt`, rồi chạy `npm run voice -w @viup/video`. Nếu báo icon không tồn tại, tìm tên đúng bằng `npm run icons -w @viup/video -- search <từ khoá>`.
+Lưu thành `packages/video/spec.json`, rồi chạy `npm run stills -w @viup/video` để xem nhanh, `npm run render -w @viup/video` để ra MP4. Nếu báo icon không tồn tại, tìm tên đúng bằng `npm run icons -w @viup/video -- search <từ khoá>`.
 
 ---
 

@@ -101,7 +101,7 @@ viup/
 - Quay video demo để nộp audit (xem docs/SETUP_APIS.md).
 - ✅ Xong khi: upload thành công trên cả 2 nền tảng ở chế độ riêng tư/nháp.
 
-### Phase 1 — Video engine v2: "scene engine" (từ VideoSpec ra MP4) — 🚧 VIỆC TIẾP THEO
+### Phase 1 — Video engine v2: "scene engine" (từ VideoSpec ra MP4) — 🚧 code xong (2026-10-15), chờ người dùng xem và duyệt
 
 **Đã có:** bố cục dẫn chương trình (bảng icon ở trên, phụ đề giữa, cua ở dưới), icon Fluent Emoji Flat (`scripts/icons.ts`), nhạc nền tự tổng hợp + ducking (`tools/music/make_loop.py`), giọng nam NamMinh +16%, chuẩn hoá −14 LUFS.
 
@@ -139,6 +139,9 @@ viup/
 - Giữ tương thích: công cụ chuyển `script.txt` cũ sang spec.
 
 **✅ Xong khi:** `npm run render -w @viup/video -- spec.json` ra MP4 có cắt cảnh 1–2 giây, đồ vật có mặt biết nhép miệng, nền động, máy quay động, SFX, hook đầu video; có lệnh render vài khung hình (still) để kiểm tra nhanh. Người dùng xem và thấy "sinh động" ngang mẫu tham khảo.
+
+**Kết quả (2026-10-15):** làm đủ 8 mục trên (xem packages/video/README.md). Beat có thêm trường `from` (cụm từ mở đầu beat) để chỉ định chỗ cắt. `versus` chỉ dùng khi spec ghi rõ. Spec mẫu: `packages/video/spec.json`. Render 22 giây mất ~40 giây; `npm run stills` ~30 giây.
+**Chưa làm:** lớp càng cua riêng (chưa có ảnh); toạ độ mặt mới chỉnh cho ~20 icon.
 
 **Để sau / Mức 2 (tốn phí, chỉ làm khi Mức 1 chưa đủ):** dùng Gemini API vẽ tranh cảnh riêng cho từng beat (phải tra giá ảnh API trước). Ngoài ra còn: 2 nhân vật hội thoại, thư viện asset `assets/characters/<tên>/`.
 

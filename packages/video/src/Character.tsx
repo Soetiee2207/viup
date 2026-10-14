@@ -22,18 +22,23 @@ type Props = {
 	lineFrame: number; // số khung hình kể từ khi bắt đầu câu hiện tại
 };
 
-// Chớp mắt ngẫu nhiên nhưng cố định (render lại vẫn giống hệt)
-const useBlink = () => {
+// Mắt + miệng dùng chung cho cua và đồ vật biết nói (Prop.tsx)
+export const eyeOpenFor = (emotion: Emotion, blinking: boolean) =>
+	blinking ? 0.1 : emotion === 'ngacnhien' ? 1.25 : emotion === 'buon' ? 0.65 : 1;
+export const browFor = (emotion: Emotion) => (emotion === 'ngacnhien' ? 1 : emotion === 'buon' ? -1 : 0);
+
+// Chớp mắt ngẫu nhiên nhưng cố định (render lại vẫn giống hệt); seed khác nhau -> chớp lệch nhịp
+export const useBlink = (seed = '') => {
 	const frame = useCurrentFrame();
 	const {fps} = useVideoConfig();
 	const period = Math.round(fps * 3.2);
 	const cycle = Math.floor(frame / period);
-	const offset = Math.floor(random(`blink-${cycle}`) * (period - 8));
+	const offset = Math.floor(random(`blink-${seed}${cycle}`) * (period - 8));
 	const local = frame - cycle * period - offset;
 	return local >= 0 && local < 5;
 };
 
-const Eye: React.FC<{
+export const Eye: React.FC<{
 	x: number;
 	y: number;
 	size: number;
@@ -95,7 +100,7 @@ const Eye: React.FC<{
 	</>
 );
 
-const Mouth: React.FC<{face: Face; width: number; talk: number; emotion: Emotion}> = ({face, width, talk, emotion}) => {
+export const Mouth: React.FC<{face: Face; width: number; talk: number; emotion: Emotion}> = ({face, width, talk, emotion}) => {
 	const w = face.mouthWidth * width;
 	const h = w * 0.8;
 	const c = face.color;
@@ -188,8 +193,8 @@ export const Character: React.FC<Props> = ({image, width, face, emotion, talk, l
 		scale *= 0.98;
 	}
 
-	const eyeOpen = blinking ? 0.1 : emotion === 'ngacnhien' ? 1.25 : emotion === 'buon' ? 0.65 : 1;
-	const brow = emotion === 'ngacnhien' ? 1 : emotion === 'buon' ? -1 : 0;
+	const eyeOpen = eyeOpenFor(emotion, blinking);
+	const brow = browFor(emotion);
 	const eyeSize = face.eyeSize * width;
 
 	return (

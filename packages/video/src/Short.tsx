@@ -1,15 +1,14 @@
-import React from 'react';
-import {AbsoluteFill, Audio, Img, interpolate, random, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import React, {useMemo} from 'react';
+import {AbsoluteFill, Audio, Easing, interpolate, random, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {z} from 'zod';
-import {Character} from './Character';
-import {Stage} from './Stage';
+import {Scene, stickerText, type CrabConfig} from './Scene';
 import {Subtitle} from './Subtitle';
+import {buildTimeline, type Scene as SceneData} from './timeline';
 import type {Manifest} from './types';
 
 // Các tuỳ chỉnh này sửa trực tiếp được trong Remotion Studio (bảng Props bên phải)
 export const shortSchema = z.object({
 	characterImage: z.string().describe('Ảnh nhân vật trong public/, vd character/body.png — để trống = nhân vật mẫu'),
-	characterWidth: z.number().min(200).max(1080),
 	face: z.object({
 		eyeLeftX: z.number().min(0).max(1),
 		eyeRightX: z.number().min(0).max(1),
@@ -20,49 +19,29 @@ export const shortSchema = z.object({
 		mouthWidth: z.number().min(0).max(0.5),
 		color: z.string(),
 	}),
-	backgroundImage: z.string().describe('Ảnh nền 9:16 trong public/, vd background.png — để trống = nền màu'),
-	music: z.string().describe('Nhạc nền trong public/, vd music/sunny-reef.mp3 — để trống = không nhạc'),
+	music: z.string().describe('Nhạc nền mặc định trong public/ (spec.json có "music" thì dùng của spec) — để trống = không nhạc'),
 	musicVolume: z.number().min(0).max(1),
-	backgroundTop: z.string(),
-	backgroundBottom: z.string(),
+	sfxVolume: z.number().min(0).max(1),
 });
 
 export type ShortProps = z.infer<typeof shortSchema> & {manifest?: Manifest};
 
-const Bubbles: React.FC = () => {
-	const frame = useCurrentFrame();
-	const {width, height} = useVideoConfig();
-	return (
-		<>
-			{Array.from({length: 14}, (_, i) => {
-				const size = 20 + random(`s${i}`) * 60;
-				const speed = 1 + random(`v${i}`) * 2;
-				const y = height + 100 - ((frame * speed + random(`y${i}`) * height) % (height + 200));
-				return (
-					<div
-						key={i}
-						style={{
-							position: 'absolute',
-							left: random(`x${i}`) * width,
-							top: y,
-							width: size,
-							height: size,
-							borderRadius: '50%',
-							border: '4px solid rgba(255,255,255,0.35)',
-						}}
-					/>
-				);
-			})}
-		</>
-	);
+const TRANSITION_FRAMES = 8;
+
+// Độ to giọng xung quanh khung hình (cho ducking)
+const talkingNear = (envelope: number[], frame: number, radius: number) => {
+	let talking = 0;
+	for (let i = frame - radius; i <= frame + radius; i++) talking = Math.max(talking, envelope[i] ?? 0);
+	return talking;
 };
 
 // Nhạc nền tự nhỏ lại khi cua nói (ducking), fade-in đầu và fade-out cuối video
 const musicVolume = (frame: number, manifest: Manifest, base: number, total: number) => {
-	const {envelope, fps} = manifest;
-	let talking = 0;
-	for (let i = frame - 6; i <= frame + 6; i++) talking = Math.max(talking, envelope[i] ?? 0);
-	const duck = interpolate(talking, [0.05, 0.3], [1, 0.45], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const {fps} = manifest;
+	const duck = interpolate(talkingNear(manifest.envelope, frame, 6), [0.05, 0.3], [1, 0.45], {
+		extrapolateLeft: 'clamp',
+		extrapolateRight: 'clamp',
+	});
 	const fade = Math.min(
 		interpolate(frame, [0, fps * 0.5], [0, 1], {extrapolateRight: 'clamp'}),
 		interpolate(frame, [total - fps * 1.2, total], [1, 0], {extrapolateLeft: 'clamp'}),
@@ -70,59 +49,92 @@ const musicVolume = (frame: number, manifest: Manifest, base: number, total: num
 	return base * duck * fade;
 };
 
+// Biến đổi lúc chuyển cảnh: p = 0 -> 1 trong TRANSITION_FRAMES khung hình đầu cảnh mới
+const enterStyle = (kind: SceneData['transition'], p: number): React.CSSProperties => {
+	if (kind === 'slide') return {transform: `translateX(${(1 - p) * 100}%)`};
+	if (kind === 'spin') return {transform: `rotate(${(1 - p) * -14}deg) scale(${0.55 + 0.45 * p})`, opacity: Math.min(1, p * 2)};
+	if (kind === 'zoom') return {transform: `scale(${1 + (1 - p) * 0.6})`, opacity: Math.min(1, p * 1.6)};
+	return {};
+};
+const exitStyle = (kind: SceneData['transition'], p: number): React.CSSProperties =>
+	kind === 'slide' ? {transform: `translateX(${-p * 100}%)`} : {};
+
+const Hook: React.FC<{text: string; end: number}> = ({text, end}) => {
+	const frame = useCurrentFrame();
+	const {fps} = useVideoConfig();
+	const slam = spring({frame, fps, config: {damping: 12, stiffness: 260, overshootClamping: true}});
+	const out = interpolate(frame, [end - 6, end], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const shake = frame < 12 ? (1 - frame / 12) * 16 : 0;
+	return (
+		<div
+			style={{
+				...stickerText,
+				position: 'absolute',
+				top: 150,
+				left: 40,
+				right: 40,
+				fontSize: text.length > 16 ? 112 : 136,
+				color: '#ffd43b',
+				WebkitTextStroke: '22px #1b1430',
+				textTransform: 'uppercase',
+				opacity: out,
+				transform: `translate(${(random(`hx${frame}`) - 0.5) * shake}px, ${(random(`hy${frame}`) - 0.5) * shake}px) rotate(-4deg) scale(${(2.4 - 1.4 * slam) * (0.9 + 0.1 * out)})`,
+			}}
+		>
+			{text}
+		</div>
+	);
+};
+
 export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
 	const frame = useCurrentFrame();
 	const {fps, durationInFrames} = useVideoConfig();
-	if (!manifest) return null;
+	const timeline = useMemo(() => (manifest ? buildTimeline(manifest, durationInFrames) : null), [manifest, durationInFrames]);
+	if (!manifest || !timeline) return null;
+	const {scenes, sfx, hookEnd} = timeline;
 
-	const t = frame / fps;
-	const lines = manifest.lines;
-	const index = Math.max(0, lines.findLastIndex((l) => l.start <= t));
-	const line = lines[index];
-	const lineFrame = Math.max(0, frame - Math.round(line.start * fps));
-	// Câu không khai báo hình thì giữ hình của câu gần nhất phía trước
-	const visualIndex = lines.findLastIndex((l, i) => i <= index && l.props.length > 0);
-	const visual = visualIndex >= 0 ? lines[visualIndex] : null;
-	const visualFrame = visual ? Math.max(0, frame - Math.round(visual.start * fps)) : 0;
+	const i = Math.max(0, scenes.findLastIndex((s) => s.from <= frame));
+	const scene = scenes[i];
+	const prev = scenes[i - 1];
+	const tf = frame - scene.from;
+	const inTransition = prev && tf < TRANSITION_FRAMES && scene.transition !== 'cut' && scene.transition !== 'flash';
+	const progress = Easing.out(Easing.cubic)(Math.min(1, tf / TRANSITION_FRAMES));
 	// Làm mượt độ to giọng để miệng không giật
 	const env = manifest.envelope;
 	const talk = ((env[frame - 1] ?? 0) + (env[frame] ?? 0) * 2 + (env[frame + 1] ?? 0)) / 4;
-
-	const zoom = 1 + (frame / durationInFrames) * 0.08;
+	const crab: CrabConfig = {image: p.characterImage, face: p.face};
+	const music = manifest.music ?? p.music;
 
 	return (
-		<AbsoluteFill style={{background: `linear-gradient(${p.backgroundTop}, ${p.backgroundBottom})`}}>
-			{p.backgroundImage ? (
-				<Img
-					src={staticFile(p.backgroundImage)}
-					style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${zoom})`}}
-				/>
-			) : (
-				<Bubbles />
+		<AbsoluteFill style={{background: '#1b1430'}}>
+			{inTransition && (
+				<AbsoluteFill style={exitStyle(scene.transition, progress)}>
+					<Scene scene={prev} crab={crab} talk={talk} />
+				</AbsoluteFill>
 			)}
-			{visual && <Stage key={visualIndex} line={visual} visualFrame={visualFrame} />}
-			{/* Cua dẫn chương trình ở dưới, chừa vùng chú thích/nút của TikTok/Shorts */}
-			<AbsoluteFill style={{alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 200}}>
-				<Character
-					image={p.characterImage}
-					width={p.characterWidth}
-					face={p.face}
-					emotion={line.emotion}
-					talk={talk}
-					lineFrame={lineFrame}
-				/>
+			<AbsoluteFill style={inTransition ? enterStyle(scene.transition, progress) : undefined}>
+				<Scene scene={scene} crab={crab} talk={talk} />
 			</AbsoluteFill>
-			<div style={{position: 'absolute', top: 905, left: 50, right: 50}}>
-				<Subtitle key={index} line={line} lineFrame={lineFrame} />
+			{scene.transition === 'flash' && tf < TRANSITION_FRAMES && (
+				<AbsoluteFill style={{background: 'white', opacity: 1 - tf / TRANSITION_FRAMES}} />
+			)}
+			{frame < hookEnd && manifest.hook && <Hook text={manifest.hook} end={hookEnd} />}
+			<div style={{position: 'absolute', top: 1190, left: 40, right: 40}}>
+				<Subtitle words={scene.words} startFrame={scene.from} />
 			</div>
 			<Audio src={staticFile('voice.wav')} />
-			{p.music && (
-				<Audio
-					src={staticFile(p.music)}
-					loop
-					volume={(f) => musicVolume(f, manifest, p.musicVolume, durationInFrames)}
-				/>
+			{music && (
+				<Audio src={staticFile(music)} loop volume={(f) => musicVolume(f, manifest, p.musicVolume, durationInFrames)} />
 			)}
+			{sfx.map((e, k) => (
+				<Sequence key={k} from={e.frame} durationInFrames={fps * 2} layout="none">
+					{/* SFX cũng được duck nhẹ khi đang nói */}
+					<Audio
+						src={staticFile(`sfx/${e.sound}.mp3`)}
+						volume={p.sfxVolume * e.volume * (talkingNear(env, e.frame, 2) > 0.3 ? 0.7 : 1)}
+					/>
+				</Sequence>
+			))}
 		</AbsoluteFill>
 	);
 };

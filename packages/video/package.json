@@ -2,16 +2,19 @@
   "name": "@viup/video",
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render Short out/short.mp4",
-    "voice": "uv run ../../tools/tts/make_voice.py script.txt --out public && node scripts/icons.ts sync",
+    "render": "node scripts/render.ts",
+    "stills": "node scripts/render.ts --stills",
+    "voice": "node scripts/render.ts --voice-only",
     "typecheck": "tsc -p .",
     "icons": "node scripts/icons.ts"
   },
   "type": "module",
   "dependencies": {
     "@iconify-json/fluent-emoji-flat": "1.2.6",
+    "@remotion/bundler": "4.0.535",
     "@remotion/cli": "4.0.535",
     "@remotion/google-fonts": "4.0.535",
+    "@remotion/renderer": "4.0.535",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "remotion": "4.0.535",
