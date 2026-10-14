@@ -9,7 +9,10 @@ Nên dùng **một tài khoản Google/TikTok/Facebook riêng cho kênh** (khôn
 Cả YouTube và TikTok đều đòi app có **trang web công khai** gồm *Chính sách quyền riêng tư* và *Điều khoản sử dụng*, và muốn thấy app **thực sự chạy được** (video demo hoặc tài khoản thử). Vì vậy thứ tự đúng là:
 
 1. Tạo tài khoản riêng cho kênh: Gmail mới, kênh YouTube "Cua Biết Tuốt", tài khoản TikTok.
-2. Dựng trang pháp lý (Privacy Policy + Terms) bằng **GitHub Pages**, miễn phí, ví dụ `https://soetiee2207.github.io/viup/`. Claude có thể soạn sẵn nội dung.
+2. ✅ Trang pháp lý đã có trên **GitHub Pages** (nguồn ở `site/`, tự deploy khi push):
+   - Trang chủ: https://soetiee2207.github.io/viup/
+   - Privacy Policy: https://soetiee2207.github.io/viup/privacy/
+   - Terms of Service: https://soetiee2207.github.io/viup/terms/
 3. Code **luồng đăng bài tối thiểu** (Phase 6a, làm sớm): đăng nhập OAuth → upload 1 video ở chế độ riêng tư. Quay màn hình lại để làm video demo.
 4. Nộp audit. Trong lúc chờ (vài tuần đến vài tháng), tool vẫn chạy các phase khác bình thường.
 
