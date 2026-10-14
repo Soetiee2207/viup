@@ -95,6 +95,12 @@ viup/
 - **Đăng ký ngay** API YouTube, TikTok, Facebook và gửi audit, vì phải chờ duyệt lâu (xem mục 4).
 - ✅ Xong khi: `npm run dev` chạy được web và worker rỗng; DB được tạo.
 
+### Phase 6a — Upload tối thiểu (làm sớm, phục vụ audit)
+- Trang Privacy Policy + Terms trên GitHub Pages.
+- CLI: OAuth YouTube → upload 1 video riêng tư; TikTok: gửi video vào hộp nháp (Upload API).
+- Quay video demo để nộp audit (xem docs/SETUP_APIS.md).
+- ✅ Xong khi: upload thành công trên cả 2 nền tảng ở chế độ riêng tư/nháp.
+
 ### Phase 1 — Video engine v2 (từ VideoSpec ra MP4)
 - Phụ đề khớp **từng từ** nhờ WordBoundary của edge-tts.
 - **Props:** icon xuất hiện theo câu với các hiệu ứng có sẵn (pop, slide, shake, đếm số, mũi tên chỉ).
@@ -132,6 +138,7 @@ viup/
 
 ### Phase 6 — Publish
 - YouTube Data API (`videos.insert`), Facebook Graph API (Reels lên Page), TikTok Content Posting API.
+- TikTok mặc định dùng chế độ **gửi vào hộp nháp** (một chạm bấm Đăng), vì guideline TikTok yêu cầu người dùng tự xác nhận khi Direct Post.
 - Bật cờ **"nội dung tạo bằng AI"** mà các API hỗ trợ; đăng đúng giờ vàng theo lịch.
 - ✅ Xong khi: video tự đăng công khai trên ít nhất 1 nền tảng.
 

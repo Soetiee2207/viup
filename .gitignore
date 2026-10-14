@@ -38,3 +38,5 @@ tmp/
 data/
 *.tsbuildinfo
 next-env.d.ts
+
+secrets/
