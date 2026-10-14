@@ -15,7 +15,7 @@ export const ensureDefaultChannel = async (db: Db) => {
 		name: 'Crab vibe',
 		formats: {'fun-fact': 0.6, zodiac: 0.4},
 		character: 'crab',
-		voice: 'vi-VN-HoaiMyNeural',
+		voice: 'vi-VN-NamMinhNeural',
 		schedule: '0 11,19 * * *',
 		videosPerDay: 2,
 	});

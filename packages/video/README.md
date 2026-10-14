@@ -22,7 +22,7 @@ npm run studio   # xem trước & chỉnh trong trình duyệt
 npm run render   # xuất out/short.mp4
 ```
 
-Đổi giọng/tốc độ: `uv run ../../tools/tts/make_voice.py script.txt --out public --voice vi-VN-NamMinhNeural --rate +15%`
+Đổi giọng/tốc độ: `uv run ../../tools/tts/make_voice.py script.txt --out public --voice vi-VN-HoaiMyNeural --rate +15%` (mặc định là giọng nam NamMinh)
 
 Chưa có ảnh nhân vật thì video dùng nhân vật mẫu (bạch tuộc tím). Muốn dùng nhân vật riêng vẽ bằng Gemini: xem **[docs/GEMINI_PROMPTS.md](../../docs/GEMINI_PROMPTS.md)**.
 
