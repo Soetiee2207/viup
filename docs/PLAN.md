@@ -95,7 +95,7 @@ viup/
 - **Đăng ký ngay** API YouTube, TikTok, Facebook và gửi audit, vì phải chờ duyệt lâu (xem mục 4).
 - ✅ Xong khi: `npm run dev` chạy được web và worker rỗng; DB được tạo.
 
-### Phase 6a — Upload tối thiểu (làm sớm, phục vụ audit)
+### Phase 6a — Upload tối thiểu (làm sớm, phục vụ audit) — 🚧 YouTube ✅ (2026-10-14), TikTok chờ key
 - Trang Privacy Policy + Terms trên GitHub Pages.
 - CLI: OAuth YouTube → upload 1 video riêng tư; TikTok: gửi video vào hộp nháp (Upload API).
 - Quay video demo để nộp audit (xem docs/SETUP_APIS.md).
