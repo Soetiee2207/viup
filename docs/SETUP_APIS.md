@@ -8,7 +8,7 @@ Nên dùng **một tài khoản Google/TikTok/Facebook riêng cho kênh** (khôn
 
 Cả YouTube và TikTok đều đòi app có **trang web công khai** gồm *Chính sách quyền riêng tư* và *Điều khoản sử dụng*, và muốn thấy app **thực sự chạy được** (video demo hoặc tài khoản thử). Vì vậy thứ tự đúng là:
 
-1. Tạo tài khoản riêng cho kênh: Gmail mới, kênh YouTube "Cua Biết Tuốt", tài khoản TikTok.
+1. Tạo tài khoản riêng cho kênh: Gmail mới, kênh YouTube "Crab vibe", tài khoản TikTok.
 2. ✅ Trang pháp lý đã có trên **GitHub Pages** (nguồn ở `site/`, tự deploy khi push):
    - Trang chủ: https://soetiee2207.github.io/viup/
    - Privacy Policy: https://soetiee2207.github.io/viup/privacy/

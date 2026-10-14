@@ -11,7 +11,7 @@ export const ensureDefaultChannel = async (db: Db) => {
 	const existing = await db.select({id: channels.id}).from(channels).limit(1);
 	if (existing.length) return;
 	await db.insert(channels).values({
-		name: 'Cua Biết Tuốt',
+		name: 'Crab vibe',
 		formats: {'fun-fact': 0.6, zodiac: 0.4},
 		character: 'crab',
 		voice: 'vi-VN-HoaiMyNeural',

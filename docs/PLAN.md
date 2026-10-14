@@ -36,7 +36,7 @@ Một kênh, mascot cua, xen kẽ 2 **định dạng nội dung** (format), tỉ
 
 | Format | Tỉ lệ ban đầu | Ví dụ | Nguồn |
 |---|---|---|---|
-| `fun-fact` — "Cua Biết Tuốt" | 60% | "Bạch tuộc có 3 trái tim", "Vì sao mèo sợ dưa chuột?" | Wikipedia, Reddit TIL, trang khoa học phổ thông |
+| `fun-fact` — sự thật thú vị | 60% | "Bạch tuộc có 3 trái tim", "Vì sao mèo sợ dưa chuột?" | Wikipedia, Reddit TIL, trang khoa học phổ thông |
 | `zodiac` — cung hoàng đạo & tâm lý vui | 40% | "3 cung dễ ghen nhất", "Cự Giải khi giận sẽ…" | LLM sinh ý tưởng theo bộ khung chủ đề, không cần crawl |
 
 - Tránh: tin nóng, sức khoẻ, tài chính, chính trị, drama người thật (AI viết sai khi không có người duyệt là rủi ro lớn).
