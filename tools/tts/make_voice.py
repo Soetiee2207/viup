@@ -85,6 +85,18 @@ async def tts_to_pcm(text: str, voice: str, rate: str, tmp: Path) -> bytes:
     ).stdout
 
 
+def normalize(pcm: bytes) -> bytes:
+    """Chuẩn hoá độ to về -14 LUFS (chuẩn của YouTube/TikTok), giữ nguyên độ dài."""
+    fmt = ["-f", "s16le", "-ac", "1", "-ar", str(SAMPLE_RATE)]
+    out = subprocess.run(
+        ["ffmpeg", "-v", "error", *fmt, "-i", "-", "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", *fmt, "-"],
+        input=pcm,
+        check=True,
+        capture_output=True,
+    ).stdout
+    return out[: len(pcm)].ljust(len(pcm), b"\x00")
+
+
 def envelope(pcm: bytes) -> list[float]:
     """Độ to (RMS) cho từng khung hình, chuẩn hoá về 0..1."""
     samples = array.array("h", pcm)
@@ -118,6 +130,7 @@ async def main() -> None:
             line["end"] = round(len(pcm) / 2 / SAMPLE_RATE, 3)
             pcm += gap
 
+    pcm = normalize(bytes(pcm))
     public = args.out
     public.mkdir(parents=True, exist_ok=True)
     with wave.open(str(public / "voice.wav"), "wb") as w:
