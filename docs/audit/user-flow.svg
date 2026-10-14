@@ -1,0 +1,41 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1280' height='1340' viewBox='0 0 1280 1340'>
+<defs><marker id='a' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#2563eb'/></marker></defs>
+<rect width='1280' height='1340' fill='#f8fafc'/>
+<text x='60' y='70' font-family='DejaVu Sans, Arial, sans-serif' font-size='36' font-weight='bold' fill='#1f2937'>viup – User flow</text>
+<text x='60' y='108' font-family='DejaVu Sans, Arial, sans-serif' font-size='21' fill='#6b7280'>Operated only by the channel owner, step by step</text>
+<rect x='160' y='150' width='1000' height='120' rx='16' fill='#ffffff' stroke='#94a3b8' stroke-width='2.5'/>
+<circle cx='110' cy='210.0' r='30' fill='#2563eb'/><text x='110' y='220.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>1</text>
+<text x='190' y='190' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#1f2937'>Start sign-in</text>
+<text x='190' y='225' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>Operator runs npm run yt:auth on their computer</text>
+<line x1='660.0' y1='270' x2='660.0' y2='318' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<rect x='160' y='320' width='1000' height='120' rx='16' fill='#fff7ed' stroke='#f97316' stroke-width='2.5'/>
+<circle cx='110' cy='380.0' r='30' fill='#2563eb'/><text x='110' y='390.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>2</text>
+<text x='190' y='360' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#1f2937'>Google consent screen</text>
+<text x='190' y='395' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>Browser opens accounts.google.com · app "viup" asks for</text>
+<text x='190' y='423' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>youtube.upload + youtube.readonly · operator clicks Allow</text>
+<line x1='660.0' y1='440' x2='660.0' y2='488' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<rect x='160' y='490' width='1000' height='120' rx='16' fill='#ffffff' stroke='#94a3b8' stroke-width='2.5'/>
+<circle cx='110' cy='550.0' r='30' fill='#2563eb'/><text x='110' y='560.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>3</text>
+<text x='190' y='530' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#1f2937'>Token saved locally</text>
+<text x='190' y='565' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>Google redirects to 127.0.0.1 · viup exchanges the code (PKCE)</text>
+<text x='190' y='593' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>Refresh token stored in secrets/youtube_token.json</text>
+<line x1='660.0' y1='610' x2='660.0' y2='658' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<rect x='160' y='660' width='1000' height='120' rx='16' fill='#ffffff' stroke='#94a3b8' stroke-width='2.5'/>
+<circle cx='110' cy='720.0' r='30' fill='#2563eb'/><text x='110' y='730.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>4</text>
+<text x='190' y='700' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#1f2937'>Render a video</text>
+<text x='190' y='735' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>Operator renders a Short locally (npm run render) → out/short.mp4</text>
+<line x1='660.0' y1='780' x2='660.0' y2='828' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<rect x='160' y='830' width='1000' height='120' rx='16' fill='#ffffff' stroke='#94a3b8' stroke-width='2.5'/>
+<circle cx='110' cy='890.0' r='30' fill='#2563eb'/><text x='110' y='900.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>5</text>
+<text x='190' y='870' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#1f2937'>Upload</text>
+<text x='190' y='905' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>Operator runs npm run yt:upload → videos.insert (resumable)</text>
+<text x='190' y='933' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>privacyStatus = private · madeForKids = false · title from script</text>
+<line x1='660.0' y1='950' x2='660.0' y2='998' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<rect x='160' y='1000' width='1000' height='120' rx='16' fill='#ffffff' stroke='#94a3b8' stroke-width='2.5'/>
+<circle cx='110' cy='1060.0' r='30' fill='#2563eb'/><text x='110' y='1070.0' font-family='DejaVu Sans, Arial, sans-serif' font-size='28' font-weight='bold' fill='white' text-anchor='middle'>6</text>
+<text x='190' y='1040' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#1f2937'>Result</text>
+<text x='190' y='1075' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>The video appears in YouTube Studio on the operator's own channel</text>
+<rect x='160' y='1180' width='1000' height='110' rx='16' fill='#f0fdf4' stroke='#22c55e' stroke-width='2.5' stroke-dasharray='8 6'/>
+<text x='190' y='1222' font-family='DejaVu Sans, Arial, sans-serif' font-size='23' font-weight='bold' fill='#15803d'>Revoke anytime</text>
+<text x='190' y='1258' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#6b7280'>https://security.google.com/settings/security/permissions → token stops working</text>
+</svg>

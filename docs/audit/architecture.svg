@@ -1,0 +1,52 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1080' viewBox='0 0 1600 1080'>
+<defs><marker id='a' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#2563eb'/></marker></defs>
+<rect width='1600' height='1080' fill='#f8fafc'/>
+<text x='60' y='70' font-family='DejaVu Sans, Arial, sans-serif' font-size='36' font-weight='bold' fill='#1f2937'>viup – Architecture</text>
+<text x='60' y='108' font-family='DejaVu Sans, Arial, sans-serif' font-size='21' fill='#6b7280'>Internal tool that uploads my own videos to my own YouTube channel via YouTube API Services</text>
+<rect x='60' y='150' width='620' height='720' rx='22' fill='#eef2ff' stroke='#6366f1' stroke-width='3' stroke-dasharray='10 8'/>
+<text x='370' y='192' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#4338ca' text-anchor='middle'>Operator's own computer (local only)</text>
+<rect x='110' y='225' width='520' height='150' rx='16' fill='#ffffff' stroke='#94a3b8' stroke-width='2.5'/>
+<text x='370.0' y='263' font-family='DejaVu Sans, Arial, sans-serif' font-size='24' font-weight='bold' fill='#1f2937' text-anchor='middle'>Video renderer (Remotion)</text>
+<text x='370.0' y='297' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>Renders animated Shorts from a script</text>
+<text x='370.0' y='325' font-family='DejaVu Sans Mono, monospace' font-size='19' fill='#1f2937' text-anchor='middle'>out/short.mp4</text>
+<rect x='110' y='430' width='520' height='170' rx='16' fill='#ffffff' stroke='#6366f1' stroke-width='2.5'/>
+<text x='370.0' y='468' font-family='DejaVu Sans, Arial, sans-serif' font-size='24' font-weight='bold' fill='#1f2937' text-anchor='middle'>viup CLI (packages/publish)</text>
+<text x='370.0' y='502' font-family='DejaVu Sans Mono, monospace' font-size='19' fill='#1f2937' text-anchor='middle'>npm run yt:auth  – OAuth sign-in</text>
+<text x='370.0' y='530' font-family='DejaVu Sans Mono, monospace' font-size='19' fill='#1f2937' text-anchor='middle'>npm run yt:upload – upload a video</text>
+<text x='370.0' y='558' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>Run manually by the channel owner</text>
+<rect x='110' y='660' width='520' height='170' rx='16' fill='#ffffff' stroke='#94a3b8' stroke-width='2.5'/>
+<text x='370.0' y='698' font-family='DejaVu Sans, Arial, sans-serif' font-size='24' font-weight='bold' fill='#1f2937' text-anchor='middle'>Local storage (never shared)</text>
+<text x='370.0' y='732' font-family='DejaVu Sans Mono, monospace' font-size='19' fill='#1f2937' text-anchor='middle'>secrets/youtube_client.json</text>
+<text x='370.0' y='760' font-family='DejaVu Sans Mono, monospace' font-size='19' fill='#1f2937' text-anchor='middle'>secrets/youtube_token.json</text>
+<text x='370.0' y='788' font-family='DejaVu Sans Mono, monospace' font-size='19' fill='#1f2937' text-anchor='middle'>data/viup.db (local SQLite)</text>
+<line x1='370' y1='375' x2='370' y2='428' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<text x='385' y='634' font-family='DejaVu Sans, Arial, sans-serif' font-size='18' fill='#2563eb' font-weight='bold'>stores token</text>
+<rect x='800' y='150' width='740' height='720' rx='22' fill='#fef2f2' stroke='#ef4444' stroke-width='3' stroke-dasharray='10 8'/>
+<text x='1170' y='192' font-family='DejaVu Sans, Arial, sans-serif' font-size='25' font-weight='bold' fill='#b91c1c' text-anchor='middle'>Google / YouTube</text>
+<rect x='860' y='225' width='620' height='170' rx='16' fill='#ffffff' stroke='#ef4444' stroke-width='2.5'/>
+<text x='1170.0' y='263' font-family='DejaVu Sans, Arial, sans-serif' font-size='24' font-weight='bold' fill='#1f2937' text-anchor='middle'>Google OAuth 2.0</text>
+<text x='1170.0' y='297' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>accounts.google.com consent screen</text>
+<text x='1170.0' y='325' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>Authorization code + PKCE (S256)</text>
+<text x='1170.0' y='353' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>Loopback redirect http://127.0.0.1</text>
+<rect x='860' y='445' width='620' height='190' rx='16' fill='#ffffff' stroke='#ef4444' stroke-width='2.5'/>
+<text x='1170.0' y='483' font-family='DejaVu Sans, Arial, sans-serif' font-size='24' font-weight='bold' fill='#1f2937' text-anchor='middle'>YouTube Data API v3</text>
+<text x='1170.0' y='517' font-family='DejaVu Sans Mono, monospace' font-size='19' fill='#1f2937' text-anchor='middle'>videos.insert (resumable upload)</text>
+<text x='1170.0' y='545' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>Scopes: youtube.upload, youtube.readonly</text>
+<rect x='860' y='690' width='620' height='140' rx='16' fill='#ffffff' stroke='#ef4444' stroke-width='2.5'/>
+<text x='1170.0' y='728' font-family='DejaVu Sans, Arial, sans-serif' font-size='24' font-weight='bold' fill='#1f2937' text-anchor='middle'>Operator's own YouTube channel</text>
+<text x='1170.0' y='762' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>Uploaded as private by default</text>
+<text x='1170.0' y='790' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#6b7280' text-anchor='middle'>Visible in YouTube Studio</text>
+<line x1='632' y1='470' x2='858' y2='330' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<line x1='858' y1='380' x2='632' y2='515' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<line x1='632' y1='560' x2='858' y2='540' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<line x1='1170' y1='635' x2='1170' y2='688' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<line x1='370' y1='600' x2='370' y2='658' stroke='#2563eb' stroke-width='3.5' marker-end='url(#a)'/>
+<rect x='627.0' y='363' width='236' height='26' rx='6' fill='white' stroke='#2563eb' stroke-width='1.5'/><text x='745' y='382' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#2563eb' font-weight='bold' text-anchor='middle'>1. sign-in &amp; consent</text>
+<rect x='687.5' y='449' width='115' height='26' rx='6' fill='white' stroke='#2563eb' stroke-width='1.5'/><text x='745' y='468' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#2563eb' font-weight='bold' text-anchor='middle'>2. tokens</text>
+<rect x='654.5' y='556' width='181' height='26' rx='6' fill='white' stroke='#2563eb' stroke-width='1.5'/><text x='745' y='575' font-family='DejaVu Sans, Arial, sans-serif' font-size='19' fill='#2563eb' font-weight='bold' text-anchor='middle'>3. upload video</text>
+<text x='1185' y='668' font-family='DejaVu Sans, Arial, sans-serif' font-size='18' fill='#2563eb' font-weight='bold'>4. published to own channel</text>
+<text x='60' y='925' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#1f2937'>• Single user: the channel owner. No public app, no other accounts, no backend server.</text>
+<text x='60' y='959' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#1f2937'>• Data stays on the operator's computer; nothing is sold or shared with third parties.</text>
+<text x='60' y='993' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#1f2937'>• Access can be revoked anytime at https://security.google.com/settings/security/permissions</text>
+<text x='60' y='1027' font-family='DejaVu Sans, Arial, sans-serif' font-size='20' fill='#1f2937'>• Privacy: https://soetiee2207.github.io/viup/privacy/   ·   Terms: https://soetiee2207.github.io/viup/terms/</text>
+</svg>
