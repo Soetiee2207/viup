@@ -13,6 +13,9 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "yt:auth": "node packages/publish/src/cli.ts youtube:auth",
     "yt:upload": "node packages/publish/src/cli.ts youtube:upload",
+    "daily": "node worker/src/daily.ts",
+    "daily:install": "node worker/src/install-timer.ts",
+    "daily:uninstall": "node worker/src/install-timer.ts uninstall",
     "tt:auth": "node packages/publish/src/cli.ts tiktok:auth",
     "tt:upload": "node packages/publish/src/cli.ts tiktok:upload",
     "make": "node packages/brain/src/make.ts"

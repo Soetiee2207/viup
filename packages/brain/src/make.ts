@@ -3,7 +3,8 @@
 //   npm run make -- "3 cung dễ ghen nhất" --format zodiac
 //   npm run make -- "chủ đề" --source ghi-chu.txt --no-render   -> tự đưa nguồn, chỉ ra spec.json
 //   npm run make -- "chủ đề" --date 2026-10-20                 -> xếp vào ngày đăng cụ thể
-//   npm run make -- --auto [--days 3]                           -> tự chọn chủ đề, làm đủ video cho ngày còn thiếu (Phase 3)
+//   npm run make -- --auto [--days 3] [--ahead 1]               -> tự chọn chủ đề, làm đủ video cho ngày còn thiếu (Phase 3);
+//                                                                 --ahead N: không làm cho ngày xa hơn hôm nay + N
 //   npm run make -- --ideas [--discover]                        -> xem (hoặc sinh thêm) kho ý tưởng
 //   npm run make -- --usage                                     -> xem đã dùng bao nhiêu lượt Gemini
 // Video ra thư mục videos/<ngày đăng>/ kèm file .txt (tiêu đề, caption từng nền tảng).
@@ -33,6 +34,7 @@ const {values, positionals} = parseArgs({
 		date: {type: 'string'},
 		auto: {type: 'boolean', default: false},
 		days: {type: 'string', default: '1'},
+		ahead: {type: 'string'},
 		ideas: {type: 'boolean', default: false},
 		discover: {type: 'boolean', default: false},
 	},
@@ -147,8 +149,13 @@ Nhớ bật nhãn "nội dung do AI tạo" khi đăng.
 if (values.auto) {
 	// Mỗi ô trống thử tối đa 4 ý tưởng (fun-fact có thể bị bỏ vì Wikipedia không có nguồn)
 	let made = 0;
+	let short = false;
 	for (let n = 0; n < Number(values.days); n++) {
 		const day = nextOpenDay();
+		if (values.ahead && day > localDate(new Date(Date.now() + Number(values.ahead) * 86_400_000))) {
+			console.log(`Đã đủ video tới ${day} (giới hạn --ahead ${values.ahead}), không làm thêm.`);
+			break;
+		}
 		const missing = perDay - countOn(day);
 		const plan = planFormats(channel.formats, missing);
 		console.log(`\n=== Ngày ${day}: cần thêm ${missing} video (${Object.entries(plan).map(([f, k]) => `${f} ×${k}`).join(', ')}) ===`);
@@ -162,14 +169,17 @@ if (values.auto) {
 					ok = await produce(idea.title, format, day);
 				}
 				if (ok) made++;
-				else console.error(`✗ Không làm được video ${format} cho ngày ${day}`);
+				else {
+					short = true;
+					console.error(`✗ Không làm được video ${format} cho ngày ${day}`);
+				}
 			}
 		}
 		if (countOn(day) < perDay) break; // thiếu (thường do hết hạn mức) -> dừng, lần sau chạy tiếp
 	}
 	console.log(`\nĐã làm ${made} video. Hạn mức Gemini:`);
 	for (const u of await usage(db)) console.log(`  ${u.model}: ${u.day}/${u.rpd} lượt hôm nay`);
-	process.exit(made ? 0 : 2);
+	process.exit(short ? 2 : 0);
 }
 
 const topic = positionals.join(' ').trim();

@@ -172,6 +172,8 @@ viup/
 - Tự dọn file render cũ.
 - ✅ Xong khi: chạy 3 ngày liền tự ra video mỗi ngày, không can thiệp.
 
+**Kết quả (2026-10-17):** dùng systemd timer (user) thay vì worker chạy suốt — nhẹ, `Persistent=true` chạy bù khi máy bật lại. `worker/src/daily.ts` (`npm run daily`): `make --auto --days 2 --ahead 1` (đủ video hôm nay + mai, không làm dồn xa hơn), log `data/logs/<ngày>.log`, báo bằng notify-send (+ Telegram nếu có `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`), khoá chống chạy chồng, xoá `videos/<ngày>` cũ hơn 14 ngày (`VIUP_KEEP_DAYS`). `npm run daily:install` cài timer 7:00 và 15:30 (chạy bù sau khi hạn mức Gemini reset); `daily:uninstall` gỡ. Hàng đợi `jobs` + worker vẫn giữ cho Phase 5 (bấm nút trên web). Đang chờ chạy 3 ngày liền để xác nhận.
+
 ### Phase 5 — Webapp dashboard
 - Quản lý kênh: ngách, giọng, nhân vật, lịch, số video/ngày, nút tạm dừng khẩn cấp.
 - Trạng thái pipeline, danh sách video kèm player xem lại, log lỗi, mức dùng API.
