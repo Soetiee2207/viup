@@ -13,6 +13,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "yt:auth": "node packages/publish/src/cli.ts youtube:auth",
     "yt:upload": "node packages/publish/src/cli.ts youtube:upload",
+    "app:install": "node apps/web/scripts/install-app.ts",
+    "app:uninstall": "node apps/web/scripts/install-app.ts uninstall",
     "daily": "node worker/src/daily.ts",
     "daily:install": "node worker/src/install-timer.ts",
     "daily:uninstall": "node worker/src/install-timer.ts uninstall",

@@ -4,7 +4,7 @@
 import {spawn} from 'node:child_process';
 import {appendFileSync, closeSync, existsSync, mkdirSync, openSync, readdirSync, rmSync, statSync, unlinkSync} from 'node:fs';
 import {join} from 'node:path';
-import {findRepoRoot, loadEnv} from '@viup/core';
+import {createDb, findRepoRoot, loadEnv, migrateDb, schema} from '@viup/core';
 
 loadEnv();
 const root = findRepoRoot();
@@ -30,6 +30,17 @@ const notify = async (title: string, body: string) => {
 		body: JSON.stringify({chat_id: chat, text: `${title}\n${body}`}),
 	}).catch((e) => log(`Telegram lỗi: ${e}`));
 };
+
+// Tắt "Tự động làm video" trong app (Cài đặt) -> hẹn giờ bỏ qua; chạy tay (npm run daily / nút trong app) vẫn làm
+if (process.env.INVOCATION_ID) {
+	const db = createDb();
+	await migrateDb(db);
+	const [channel] = await db.select({active: schema.channels.active}).from(schema.channels).limit(1);
+	if (channel && !channel.active) {
+		log('Kênh đang tạm dừng (Cài đặt trong app) — bỏ qua lần chạy theo giờ.');
+		process.exit(0);
+	}
+}
 
 // Khoá để 2 lần chạy (timer + chạy tay) không đè nhau
 const lock = join(root, 'data', 'daily.lock');

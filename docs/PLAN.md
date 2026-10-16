@@ -179,6 +179,8 @@ viup/
 - Trạng thái pipeline, danh sách video kèm player xem lại, log lỗi, mức dùng API.
 - ✅ Xong khi: mọi cấu hình đều chỉnh được trên web, không phải sửa file.
 
+**Kết quả (2026-10-17):** app desktop "viup" (`npm run app:install`: build Next, service systemd `viup-web` ở 127.0.0.1:3210, `~/.local/bin/viup` mở bằng `omarchy-launch-webapp`, file .desktop + icon). Tab Video (theo ngày: xem video, copy caption, đánh dấu đã đăng từng nền tảng → `videos/<ngày>/posted.json`, xoá video không ưng), Ý tưởng (thêm chủ đề tay — điểm 99 làm trước, bỏ ý tưởng, nghĩ thêm), Cài đặt (số video/ngày, tỉ lệ format, tạm dừng hẹn giờ), Nhật ký; nút "Làm video ngay". Sửa code giao diện xong phải chạy lại `npm run app:install`.
+
 ### Phase 6 — Publish
 - YouTube Data API (`videos.insert`), Facebook Graph API (Reels lên Page), TikTok Content Posting API.
 - TikTok mặc định dùng chế độ **gửi vào hộp nháp** (một chạm bấm Đăng), vì guideline TikTok yêu cầu người dùng tự xác nhận khi Direct Post.
