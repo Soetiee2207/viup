@@ -12,7 +12,10 @@
     "db:generate": "npm run db:generate -w @viup/core",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "yt:auth": "node packages/publish/src/cli.ts youtube:auth",
-    "yt:upload": "node packages/publish/src/cli.ts youtube:upload"
+    "yt:upload": "node packages/publish/src/cli.ts youtube:upload",
+    "tt:auth": "node packages/publish/src/cli.ts tiktok:auth",
+    "tt:upload": "node packages/publish/src/cli.ts tiktok:upload",
+    "make": "node packages/brain/src/make.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.5",

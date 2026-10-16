@@ -124,5 +124,22 @@ export const jobs = sqliteTable(
 	(t) => [index('jobs_status_run_after').on(t.status, t.runAfter)],
 );
 
+// Mỗi lượt gọi API ngoài (Gemini...) — để đếm hạn mức free tier và hiện trên dashboard
+export const apiCalls = sqliteTable(
+	'api_calls',
+	{
+		id: id(),
+		service: text('service').notNull(),
+		model: text('model').notNull(),
+		status: text('status', {enum: ['pending', 'ok', 'error']})
+			.notNull()
+			.default('pending'),
+		tokens: integer('tokens'),
+		error: text('error'),
+		createdAt: createdAt(),
+	},
+	(t) => [index('api_calls_service_created').on(t.service, t.model, t.createdAt)],
+);
+
 export type Channel = typeof channels.$inferSelect;
 export type Job = typeof jobs.$inferSelect;

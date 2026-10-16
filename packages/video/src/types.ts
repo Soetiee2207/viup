@@ -58,3 +58,20 @@ export type Manifest = {
 	lines: Line[];
 	envelope: number[];
 };
+
+// Kịch bản đầu vào của engine (spec.json) — Phase 2 (packages/brain) sinh ra từ chủ đề
+export type SpecLine = {
+	text: string;
+	emotion?: Emotion;
+	beats?: Beat[];
+	props?: Prop[];
+	label?: string;
+};
+
+export type VideoSpec = {
+	// Tiêu đề khi đăng (engine không dùng)
+	title?: string;
+	hook?: string;
+	music?: string;
+	lines: SpecLine[];
+};

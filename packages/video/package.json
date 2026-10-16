@@ -1,5 +1,8 @@
 {
   "name": "@viup/video",
+  "exports": {
+    "./types": "./src/types.ts"
+  },
   "scripts": {
     "studio": "remotion studio",
     "render": "node scripts/render.ts",

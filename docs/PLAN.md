@@ -155,6 +155,9 @@ viup/
 - Bộ đếm hạn mức API và tự giãn tốc độ khi gần chạm free tier.
 - ✅ Xong khi: `npm run make -- "chủ đề"` ra MP4 hoàn chỉnh, không chạm tay.
 
+**Kết quả (2026-10-15):** code xong, chờ người dùng duyệt (xem packages/brain/README.md). Chủ đề → model lite đoán tên bài Wikipedia → lấy bài vi + en (giữ đoạn liên quan) → viết → kiểm tra bằng code (tự sửa icon, beat) → QA 6 tiêu chí (thêm `topic`: đúng chủ đề) → viết lại tối đa 2 lần → lưu DB (ideas, scripts, videos) → render. Nguồn không có thông tin thì bỏ ngay sau 1 lượt. ~1 phút/video.
+**Lưu ý hạn mức:** free tier của `gemini-3.8-flash` chỉ **20 lượt/ngày** (reset 0h giờ Thái Bình Dương). Mỗi video tốn 3–7 lượt, hết thì tự dùng `gemini-flash-lite-latest` (kịch bản kém hơn: hay viết ngắn, ít chia beat; code tự bù). Bảng `api_calls` lưu từng lượt gọi.
+
 ### Phase 3 — Sources (tìm và chọn ý tưởng)
 - Các crawler như trên; chuẩn hoá về `Idea {title, summary, sourceUrl, sourceText}`.
 - Chống trùng: so sánh với ý tưởng đã làm (hash + LLM so độ giống).
