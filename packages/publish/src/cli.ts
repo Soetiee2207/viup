@@ -1,7 +1,8 @@
-import {existsSync, readFileSync} from 'node:fs';
+import {existsSync, readdirSync, readFileSync, statSync} from 'node:fs';
 import {join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {findRepoRoot, loadEnv} from '@viup/core';
+import {tiktokAuth, tiktokUpload} from './tiktok.ts';
 import {youtubeAuth, youtubeUpload} from './youtube.ts';
 
 loadEnv();
@@ -44,7 +45,33 @@ switch (command) {
 		console.log(`Xong: ${result.url} (trạng thái: ${result.privacy})`);
 		break;
 	}
+	case 'tiktok:auth':
+		await tiktokAuth();
+		break;
+	case 'tiktok:upload': {
+		// Không truyền gì -> video mới làm gần nhất trong videos/<ngày>/
+		const videos = join(findRepoRoot(), 'videos');
+		const latest = existsSync(videos)
+			? readdirSync(videos, {recursive: true, encoding: 'utf8'})
+					.filter((f) => f.endsWith('.mp4'))
+					.map((f) => join(videos, f))
+					.sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0]
+			: undefined;
+		const file = positionals[0] ?? latest;
+		if (!file || !existsSync(file)) {
+			console.error(`Không thấy video ${file ?? ''} — tạo trước: npm run make -- "chủ đề"`);
+			process.exit(1);
+		}
+		console.log(`Đang đẩy ${file} vào nháp TikTok...`);
+		const r = await tiktokUpload(file);
+		console.log(`Mã theo dõi: ${r.publishId}`);
+		console.log(r.status === 'PROCESSING_UPLOAD' ? 'TikTok vẫn đang xử lý, vài phút nữa xem trong app.' : 'Xong: mở app TikTok → hộp thư (Inbox) / thông báo → chỉnh và đăng.');
+		// Caption nằm cạnh video (do npm run make tạo)
+		const txt = file.replace(/\.mp4$/, '.txt');
+		if (existsSync(txt)) console.log(`Caption: xem ${txt}`);
+		break;
+	}
 	default:
-		console.log('Lệnh: youtube:auth | youtube:upload [file.mp4] [--title "..."] [--description "..."]');
+		console.log('Lệnh: youtube:auth | youtube:upload [file.mp4] [--title "..."] [--description "..."] | tiktok:auth | tiktok:upload [file.mp4]');
 		process.exitCode = 1;
 }
