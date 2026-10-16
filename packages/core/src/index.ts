@@ -17,6 +17,6 @@ export const ensureDefaultChannel = async (db: Db) => {
 		character: 'crab',
 		voice: 'vi-VN-NamMinhNeural',
 		schedule: '0 11,19 * * *',
-		videosPerDay: 2,
+		videosPerDay: 3,
 	});
 };

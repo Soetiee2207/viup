@@ -164,6 +164,8 @@ viup/
 - LLM chấm điểm theo ngách của kênh, khả năng viral, độ an toàn; chọn top N mỗi ngày.
 - ✅ Xong khi: mỗi ngày tự sinh danh sách ý tưởng đã chấm điểm.
 
+**Kết quả (2026-10-16):** `packages/brain/src/ideas.ts`. Không dùng crawler: Reddit chặn (403), "Did you know" của Wikipedia toàn chủ đề hẹp/chính trị. Thay bằng model lite brainstorm 12 ý tưởng/format theo nhóm chủ đề xoay vòng mỗi ngày, tự chấm (hợp kênh, viral, an toàn, có nguồn) → code lọc (an toàn < 5 hoặc khó kiểm chứng thì bỏ) và chống trùng (fingerprint + độ giống tập từ ≥ 0,7 so với 300 ý tưởng gần nhất). Fun-fact vẫn kiểm tra nguồn Wikipedia ở bước viết; không có nguồn thì lấy ý tưởng kế tiếp (tối đa 4 lần/ô). `npm run make -- --auto [--days N]` chia video theo tỉ lệ format của kênh, làm đủ cho ngày còn thiếu; `--ideas [--discover]` xem/sinh kho ý tưởng.
+
 ### Phase 4 — Worker tự động end-to-end
 - Cron theo `Channel.schedule` → chuỗi job discover → select → script → QA → TTS → render → (upload).
 - Tự thử lại, log, cảnh báo khi lỗi liên tục (gửi tin Telegram, miễn phí).

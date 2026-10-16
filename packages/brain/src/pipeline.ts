@@ -1,8 +1,8 @@
 // Chủ đề -> kịch bản đã qua QA, lưu vào DB (ideas + scripts). Worker (Phase 4) gọi lại hàm này.
-import {createHash} from 'node:crypto';
 import {and, eq} from 'drizzle-orm';
 import {ensureDefaultChannel, schema, type Db} from '@viup/core';
 import {getFormat} from './formats.ts';
+import {fingerprint} from './ideas.ts';
 import {reviewScript, type QaReport} from './qa.ts';
 import {findSource, type Source} from './source.ts';
 import {validateSpec, type Check} from './validate.ts';
@@ -20,11 +20,6 @@ export type ScriptResult = {
 	attempts: Attempt[];
 	sources: Source[];
 };
-
-const fingerprint = (topic: string) =>
-	createHash('sha1')
-		.update(topic.toLowerCase().normalize('NFC').replace(/[^\p{L}\p{N}]+/gu, ' ').trim())
-		.digest('hex');
 
 const log = (msg: string) => console.log(msg);
 
