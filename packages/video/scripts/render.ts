@@ -52,13 +52,15 @@ const patchable = () => {
 	const next = JSON.parse(readFileSync(spec, 'utf8'));
 	const same =
 		next.lines?.length === old.lines.length &&
-		next.lines.every((l: {text: string}, i: number) => l.text === old.lines[i].text);
+		next.lines.every((l: {text: string; speaker?: string}, i: number) => l.text === old.lines[i].text && (l.speaker ?? 'crab') === (old.lines[i].speaker ?? 'crab')) &&
+		JSON.stringify(next.guest?.voice ?? null) === JSON.stringify(old.guest?.voice ?? null);
 	if (!same) return false;
 	const {lines, ...rest} = next;
 	const patched = {
 		...old,
 		hook: rest.hook ?? null,
 		music: rest.music ?? null,
+		guest: rest.guest ?? null,
 		source: {...old.source, sha1},
 		lines: old.lines.map((l, i) => ({
 			emotion: 'binhthuong',

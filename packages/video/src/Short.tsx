@@ -120,7 +120,7 @@ export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
 			)}
 			{frame < hookEnd && manifest.hook && <Hook text={manifest.hook} end={hookEnd} />}
 			<div style={{position: 'absolute', top: 1190, left: 40, right: 40}}>
-				<Subtitle words={scene.words} startFrame={scene.from} />
+				<Subtitle words={scene.words} startFrame={scene.from} who={scene.who} name={manifest.guest?.name} story={!!manifest.guest} />
 			</div>
 			<Audio src={staticFile('voice.wav')} />
 			{music && (

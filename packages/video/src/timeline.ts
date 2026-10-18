@@ -19,6 +19,8 @@ export type Scene = {
 	transition: Transition;
 	// Ai nhép miệng: cua hay đồ vật chính
 	speaker: 'crab' | 'object';
+	// Câu do ai nói (video kể chuyện): đổi màu phụ đề + bảng tên
+	who: 'crab' | 'guest';
 	words: Word[];
 };
 
@@ -144,13 +146,22 @@ export const buildTimeline = (manifest: Manifest, durationInFrames: number): Tim
 			line.words.at(-1)?.end ?? line.end,
 			specBeats.map((b) => b.from),
 		);
+		const who = line.speaker === 'guest' && manifest.guest ? 'guest' : 'crab';
 		groups.forEach((words, bi) => {
 			const beat = specBeats[bi];
 			let props = normProps(beat.props);
+			// Khách nói mà beat không tự chọn cảnh riêng -> cảnh đối thoại (cua + khách)
+			if (manifest.guest && (beat.layout === 'dialogue' || (who === 'guest' && (!beat.layout || beat.layout === 'crab-closeup' || beat.layout === 'crab-presents')))) {
+				props = normProps([{icon: manifest.guest!.icon}]);
+			}
+			// Cua nói trong video kể chuyện, beat không có hình -> cua quay sang nói với khách (thỉnh thoảng cận mặt cua)
+			const crabTalksToGuest = who === 'crab' && manifest.guest && !beat.layout && props.length === 0 && variant % 3 !== 0;
+			if (crabTalksToGuest) props = normProps([{icon: manifest.guest!.icon}]);
 			if (props.length === 0 && beat.layout && beat.layout !== 'crab-closeup') props = lastProps;
 			if (props.length > 0) lastProps = props;
-			let layout = beat.layout ?? layoutFor(props, variant);
+			let layout = (who === 'guest' || crabTalksToGuest || beat.layout === 'dialogue') && props[0]?.icon === manifest.guest!.icon && props.length === 1 && beat.layout !== 'object-hero' ? 'dialogue' : (beat.layout ?? layoutFor(props, variant));
 			if (layout !== 'crab-closeup' && props.length === 0) layout = 'crab-closeup';
+			if (layout === 'dialogue' && !manifest.guest) layout = 'crab-closeup';
 			// Hook: cảnh đầu tiên luôn là cua cận mặt
 			if (li === 0 && bi === 0 && manifest.hook && !beat.layout) layout = 'crab-closeup';
 			const label = beat.label ?? null;
@@ -180,7 +191,8 @@ export const buildTimeline = (manifest: Manifest, durationInFrames: number): Tim
 				labelAt,
 				bg: beat.bg ?? bgFor(line.emotion, layout, label !== null, variant),
 				transition,
-				speaker: layout === 'crab-closeup' || layout === 'crab-presents' ? 'crab' : 'object',
+				speaker: line.speaker ? (who === 'guest' ? 'object' : 'crab') : layout === 'crab-closeup' || layout === 'crab-presents' ? 'crab' : 'object',
+				who,
 				words,
 			});
 			variant++;

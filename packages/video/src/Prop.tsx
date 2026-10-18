@@ -63,7 +63,8 @@ export const TalkingProp: React.FC<Props> = ({icon, size, face, emotion, talk, e
 	const pop = spring({frame: enter, fps, config: {damping: 9, stiffness: 170}});
 	const float = Math.sin(t * 2.4 + phase) * size * 0.025;
 	const wobble = emotion === 'vui' ? Math.sin(t * 6 + phase) * 5 : Math.sin(t * 1.8 + phase) * 2;
-	const squash = 1 + talk * 0.06;
+	// Icon có sẵn mặt (con vật) không nhép miệng được -> nhún mạnh hơn khi nói
+	const squash = 1 + talk * (face ? 0.06 : 0.16);
 	const f = faceFor(icon);
 
 	return (

@@ -45,7 +45,7 @@ const findPhrase = (text: string[], phrase: string, min: number) => {
 	return -1;
 };
 
-export const LIMITS = {minLines: 4, maxLines: 8, minWords: 80, maxWords: 130, maxLineWords: 30, maxHook: 30, maxLabel: 22};
+export const LIMITS = {minLines: 4, maxLines: 15, minWords: 80, maxWords: 190, maxLineWords: 30, maxHook: 30, maxLabel: 22};
 
 export type Check = {errors: string[]; warnings: string[]; words: number};
 
@@ -56,7 +56,21 @@ export const validateSpec = (spec: VideoSpec): Check => {
 	if (n < LIMITS.minLines || n > LIMITS.maxLines) errors.push(`Có ${n} câu, cần ${LIMITS.minLines}–${LIMITS.maxLines} câu`);
 	const total = spec.lines.reduce((s, l) => s + words(l.text).length, 0);
 	if (total < LIMITS.minWords || total > LIMITS.maxWords)
-		errors.push(`Tổng ${total} chữ, cần ${LIMITS.minWords}–${LIMITS.maxWords} chữ (≈ 25–40 giây)`);
+		errors.push(`Tổng ${total} chữ, cần ${LIMITS.minWords}–${LIMITS.maxWords} chữ (≈ 30–60 giây)`);
+	// Nhân vật khách (video kể chuyện): icon phải có thật; câu "guest" mà không có khách -> về giọng cua
+	if (spec.guest) {
+		if (!ICONS.has(spec.guest.icon)) {
+			const fixed = nearestIcon(spec.guest.icon);
+			if (fixed) {
+				warnings.push(`Khách: icon "${spec.guest.icon}" không có, thay bằng "${fixed}"`);
+				spec.guest.icon = fixed;
+			} else errors.push(`Khách: icon "${spec.guest.icon}" không có trong DANH SÁCH ICON`);
+		}
+		spec.guest.name = spec.guest.name.trim().slice(0, 18);
+		const guestLines = spec.lines.filter((l) => l.speaker === 'guest').length;
+		if (guestLines < 2) errors.push(`Khách chỉ nói ${guestLines} câu, cần ít nhất 2 (hoặc bỏ "guest")`);
+	} else for (const l of spec.lines) if (l.speaker === 'guest') l.speaker = 'crab';
+	for (const l of spec.lines) if (l.beats?.length === 1 && !l.beats[0].layout && !l.beats[0].props?.length && !l.beats[0].label) delete l.beats;
 	if (spec.hook && spec.hook.length > LIMITS.maxHook) errors.push(`Hook "${spec.hook}" dài quá ${LIMITS.maxHook} ký tự`);
 
 	spec.lines.forEach((line, li) => {
@@ -90,7 +104,7 @@ export const validateSpec = (spec: VideoSpec): Check => {
 			if (beat.layout === 'versus' && props.length !== 2) errors.push(`${b}: bố cục versus cần đúng 2 hình`);
 			if (beat.layout === 'count' && !(props.length === 1 && (props[0].count ?? 1) > 1))
 				errors.push(`${b}: bố cục count cần 1 hình có count ≥ 2`);
-			if (beat.layout && beat.layout !== 'crab-closeup' && props.length === 0)
+			if (beat.layout && beat.layout !== 'crab-closeup' && beat.layout !== 'dialogue' && props.length === 0)
 				warnings.push(`${b}: bố cục ${beat.layout} không có hình, engine sẽ dùng cua cận mặt`);
 		});
 		// Tự sửa (không tốn lượt AI viết lại):

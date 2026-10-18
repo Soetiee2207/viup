@@ -1,7 +1,12 @@
 export type Emotion = 'vui' | 'buon' | 'ngacnhien' | 'binhthuong';
 
 // Bố cục cảnh (xem src/Scene.tsx)
-export type Layout = 'crab-presents' | 'crab-closeup' | 'object-hero' | 'versus' | 'count';
+export type Layout = 'crab-presents' | 'crab-closeup' | 'object-hero' | 'versus' | 'count' | 'dialogue';
+// Ai nói câu này: cua dẫn chuyện, hoặc nhân vật khách (đồ vật/con vật được nhân hoá, xem Guest)
+export type Speaker = 'crab' | 'guest';
+// Nhân vật khách của video kể chuyện: icon Fluent Emoji có mặt biết nói + giọng riêng
+// voice: nu = giọng nữ, tram = nam trầm, be = giọng nhí (xem tools/tts/make_voice.py)
+export type Guest = {icon: string; name: string; voice?: 'nu' | 'tram' | 'be'};
 // Nền động (xem src/Background.tsx)
 export type Bg = 'burst' | 'speedlines' | 'bokeh' | 'gloom';
 // Hiệu ứng âm thanh trong public/sfx/ (tạo bằng tools/music/make_sfx.py)
@@ -40,6 +45,7 @@ export type Word = {
 export type Line = {
 	text: string;
 	emotion: Emotion;
+	speaker?: Speaker;
 	start: number;
 	end: number;
 	words: Word[];
@@ -55,6 +61,7 @@ export type Manifest = {
 	duration: number;
 	hook?: string | null;
 	music?: string | null;
+	guest?: Guest | null;
 	lines: Line[];
 	envelope: number[];
 };
@@ -63,6 +70,7 @@ export type Manifest = {
 export type SpecLine = {
 	text: string;
 	emotion?: Emotion;
+	speaker?: Speaker;
 	beats?: Beat[];
 	props?: Prop[];
 	label?: string;
@@ -73,5 +81,6 @@ export type VideoSpec = {
 	title?: string;
 	hook?: string;
 	music?: string;
+	guest?: Guest;
 	lines: SpecLine[];
 };

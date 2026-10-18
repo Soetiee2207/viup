@@ -11,21 +11,31 @@ export type Subject = {name: string; scientificName?: string; where?: string};
 export type Draft = {title: string; spec: VideoSpec; facts: Fact[]; covered: boolean; subject: Subject};
 
 const EMOTIONS = ['vui', 'buon', 'ngacnhien', 'binhthuong'];
-const LAYOUTS = ['crab-closeup', 'crab-presents', 'object-hero', 'versus', 'count'];
+const LAYOUTS = ['crab-closeup', 'crab-presents', 'object-hero', 'versus', 'count', 'dialogue'];
 
 const SCHEMA = {
 	type: 'object',
 	properties: {
 		title: {type: 'string', description: 'Tiêu đề YouTube, ≤ 70 ký tự, gây tò mò, không hashtag'},
 		hook: {type: 'string', description: `Chữ to 2 giây đầu, 2–5 từ, ≤ ${LIMITS.maxHook} ký tự`},
+		guest: {
+			type: 'object',
+			description: 'Nhân vật khách được nhân hoá (chỉ định dạng kể chuyện)',
+			properties: {
+				icon: {type: 'string'},
+				name: {type: 'string'},
+				voice: {type: 'string', enum: ['nu', 'tram', 'be']},
+			},
+			required: ['icon', 'name', 'voice'],
+		},
 		lines: {
 			type: 'array',
-			minItems: LIMITS.minLines,
-			maxItems: LIMITS.maxLines,
+			// Không đặt minItems/maxItems: Gemini từ chối schema "quá phức tạp" (lỗi 400); số câu do validate.ts kiểm
 			items: {
 				type: 'object',
 				properties: {
 					text: {type: 'string'},
+					speaker: {type: 'string', enum: ['crab', 'guest']},
 					emotion: {type: 'string', enum: EMOTIONS},
 					beats: {
 						type: 'array',
@@ -50,7 +60,7 @@ const SCHEMA = {
 						},
 					},
 				},
-				required: ['text', 'emotion', 'beats'],
+				required: ['text', 'speaker', 'emotion', 'beats'],
 			},
 		},
 		facts: {
@@ -83,22 +93,20 @@ GIỌNG VĂN
 - Viết lại bằng lời của mình, KHÔNG chép nguyên câu từ nguồn.
 - Tránh: chính trị, tôn giáo, y tế/sức khoẻ có tính khuyên bảo, tài chính, bạo lực, tình dục, người thật còn sống, thương hiệu.
 
-CẤU TRÚC (${LIMITS.minLines}–${LIMITS.maxLines} câu, tổng ${LIMITS.minWords + 10}–${LIMITS.maxWords - 15} chữ, mỗi câu ≤ ${LIMITS.maxLineWords - 8} chữ; "chữ" = 1 âm tiết)
-1. Câu 1 = HOOK trong 3 giây: điều bất ngờ nhất, khiến người xem phải ở lại. Không chào hỏi.
-2. Giữa: giải thích, chi tiết bất ngờ, mỗi câu 1 ý.
-3. Câu áp chót: điểm "wow" hoặc twist.
-4. Câu cuối: kêu gọi theo dõi Crab vibe, ngắn, đa dạng cách nói; hình dùng "bell" (chuông) hoặc crab-closeup, KHÔNG dùng icon "crab" (cua mascot đã có sẵn).
+CẤU TRÚC: theo phần ĐỊNH DẠNG trong yêu cầu (số câu, số chữ, ai nói). Chung cho mọi định dạng:
+- Câu 1 = HOOK trong 3 giây, không chào hỏi. Câu cuối = kêu gọi theo dõi Crab vibe, ngắn, đa dạng cách nói; hình dùng "bell" (chuông) hoặc crab-closeup, KHÔNG dùng icon "crab" (cua mascot đã có sẵn).
 - Mỗi câu kết thúc bằng dấu . ! ? — số ghi bằng chữ số được (vd 300 triệu).
 - "emotion" của câu: vui | buon | ngacnhien | binhthuong (khớp nội dung; ngacnhien cho điều bất ngờ).
 
-HÌNH ẢNH (beats) — mỗi câu chia 1–3 beat, mỗi beat ~1,5 giây (≥ 4 chữ), là một cảnh riêng. Câu ≥ 8 chữ PHẢI có 2–3 beat:
+HÌNH ẢNH (beats) — mỗi câu chia 1–3 beat, mỗi beat ~1,5 giây (≥ 4 chữ), là một cảnh riêng. Câu ≥ 12 chữ nên có 2–3 beat:
 - "from": cụm 1–3 từ CHÉP Y NGUYÊN từ câu, là chỗ beat bắt đầu. Beat đầu tiên KHÔNG có "from"; mọi beat sau BẮT BUỘC có "from", theo đúng thứ tự trong câu.
 - "layout":
   crab-closeup = cua cận mặt phản ứng (KHÔNG có props, hình sẽ bị bỏ) — dùng cho câu hook/cảm xúc;
   crab-presents = cua đứng cạnh đồ vật đang nói tới;
   object-hero = đồ vật to giữa màn hình;
   versus = so sánh 2 thứ (đúng 2 props) — CHỈ khi câu thật sự so sánh/đối lập;
-  count = đếm số lượng (1 prop có count 2–9, khớp con số trong câu).
+  count = đếm số lượng (1 prop có count 2–9, khớp con số trong câu);
+  dialogue = Cua và nhân vật khách đứng nói chuyện (không cần props) — chỉ dùng khi có "guest".
 - "props": 1–2 hình minh hoạ đúng thứ đang nói. "icon" PHẢI là một tên trong DANH SÁCH ICON bên dưới (chép y nguyên). Không có icon hợp thì dùng crab-closeup.
 - "label": chữ VIẾT HOA to trên màn hình, ≤ 18 ký tự, tóm ý chính/con số của beat. Chỉ ~1/3 số beat có label.
 - Đa dạng layout, không lặp 1 layout quá 2 beat liền nhau.
@@ -135,12 +143,13 @@ ${feedback.problems.map((p) => `- ${p}`).join('\n')}
 
 Viết lại kịch bản, sửa HẾT các lỗi trên, giữ những phần tốt.`;
 	}
-	const out = await generateJson<{covered: boolean; title: string; hook: string; subject?: Subject; lines: VideoSpec['lines']; facts: Fact[]}>(db, {
+	const out = await generateJson<{covered: boolean; title: string; hook: string; guest?: VideoSpec['guest']; subject?: Subject; lines: VideoSpec['lines']; facts: Fact[]}>(db, {
 		system: SYSTEM,
 		prompt,
 		schema: SCHEMA,
 		temperature: feedback ? 0.6 : 0.9,
 	});
 	const {title, facts, covered, subject, ...spec} = out;
+	if (!format.story) delete spec.guest;
 	return {title: title.trim(), facts: facts ?? [], covered: covered !== false, subject: subject ?? {name: ''}, spec};
 };

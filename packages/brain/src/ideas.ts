@@ -15,19 +15,21 @@ export const fingerprint = (topic: string) =>
 
 // Nhóm chủ đề xoay vòng theo ngày để kênh không lặp một kiểu
 const THEMES: Record<string, string[]> = {
+	// Ưu tiên chuyện ĐỜI THƯỜNG ai cũng từng thắc mắc (đồ ăn, cơ thể, đồ vật trong nhà, con vật quen) — kiểu nội dung
+	// thu hút nhất trên Shorts kiến thức Việt; xen kẽ thiên nhiên/động vật lạ
 	'fun-fact': [
+		'đồ ăn thức uống quen thuộc (vì sao nó như vậy)',
+		'cơ thể người và thói quen hằng ngày (ngáp, nấc, ngủ, tóc, móng)',
+		'đồ vật trong nhà, trong bếp, ở trường',
+		'con vật nuôi và vật quen thuộc (chó, mèo, gà, heo, bò, cá)',
 		'động vật kỳ lạ',
 		'sinh vật biển và đại dương',
-		'côn trùng',
-		'chim',
-		'vũ trụ và hành tinh',
-		'khủng long và thời tiền sử',
-		'thực vật kỳ lạ',
-		'thú cưng (chó, mèo)',
+		'côn trùng quanh nhà',
 		'hiện tượng tự nhiên, thời tiết',
-		'phát minh và đồ vật quen thuộc',
-		'lịch sử kỳ lạ, nền văn minh cổ',
-		'địa lý, kỷ lục thế giới',
+		'phát minh và nguồn gốc đồ vật quen thuộc',
+		'thực vật, rau củ quả',
+		'vũ trụ và hành tinh',
+		'lịch sử kỳ lạ của những thứ quen thuộc',
 	],
 	zodiac: [
 		'xếp hạng top 3 cung theo một tính cách',
@@ -98,7 +100,8 @@ export const discoverIdeas = async (db: Db, opts: {format: string; count?: numbe
 	const out = await generateJson<{ideas: Candidate[]}>(db, {
 		system: `Bạn lên ý tưởng video YouTube Shorts / TikTok tiếng Việt cho kênh "Crab vibe" (mascot chú cua Cự Giải, giọng vui, dễ thương).
 ${format.writer}
-Mỗi ý tưởng là MỘT điều cụ thể, bất ngờ, kể xong trong 30 giây. Không trùng các chủ đề đã làm. Tự chấm điểm trung thực.`,
+Mỗi ý tưởng là MỘT điều cụ thể, bất ngờ, kể xong trong 45–60 giây dưới dạng chuyện kể: chính đồ vật/con vật đó được nhân hoá, tự kể với Cua.
+Ưu tiên câu hỏi đời thường mà ai cũng từng thắc mắc nhưng chưa biết đáp án (vd "Lý do xúc xích có vòng nhôm", "Tại sao không có sữa heo", "Vì sao hành tây làm cay mắt"). Tiêu đề ngắn 4–9 chữ. Không trùng các chủ đề đã làm. Tự chấm điểm trung thực.`,
 		prompt: `Định dạng: ${format.id}
 Nhóm chủ đề hôm nay: ${themes.join('; ')}
 Cho ${opts.count ?? 12} ý tưởng.

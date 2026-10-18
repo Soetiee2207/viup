@@ -40,7 +40,7 @@ const Crab: React.FC<{
 );
 
 // Cua nhỏ thò ra ở góc, phản ứng theo cảm xúc nhưng không nói
-const CornerCrab: React.FC<{crab: CrabConfig; emotion: Emotion; lf: number}> = ({crab, emotion, lf}) => {
+const CornerCrab: React.FC<{crab: CrabConfig; emotion: Emotion; lf: number; talk?: number}> = ({crab, emotion, lf, talk = 0}) => {
 	const {fps} = useVideoConfig();
 	const peek = spring({frame: lf - 6, fps, config: {damping: 12}});
 	return (
@@ -48,7 +48,7 @@ const CornerCrab: React.FC<{crab: CrabConfig; emotion: Emotion; lf: number}> = (
 			crab={crab}
 			width={330}
 			emotion={emotion}
-			talk={0}
+			talk={talk}
 			lf={lf}
 			style={{left: 10, top: 1400, transform: `translateY(${(1 - peek) * 400}px) rotate(8deg)`}}
 		/>
@@ -111,6 +111,35 @@ const Layout: React.FC<{scene: SceneData; crab: CrabConfig; talk: number; lf: nu
 						{reaction}
 					</div>
 				)}
+			</>
+		);
+	}
+
+	if (layout === 'dialogue') {
+		// Cua (trái, dưới) nói chuyện với nhân vật khách (phải, trên). Người đang nói to hơn, nghiêng về phía kia.
+		const guest = props[0];
+		const guestTurn = scene.speaker === 'object';
+		const lean = (on: boolean) => spring({frame: lf, fps, config: {damping: 14}}) * (on ? 1 : 0);
+		return (
+			<>
+				<TalkingProp
+					icon={guest.icon}
+					size={guestTurn ? 600 : 520}
+					face={guest.face}
+					emotion={guestTurn ? emotion : 'binhthuong'}
+					talk={objTalk}
+					enter={scene.firstInLine ? lf - 2 : 30}
+					seed={`guest`}
+					style={{position: 'absolute', left: guestTurn ? 430 : 470, top: guestTurn ? 380 : 420, transform: `rotate(${-6 * lean(guestTurn)}deg)`}}
+				/>
+				<Crab
+					crab={crab}
+					width={crabTalk ? 600 : 520}
+					emotion={crabTalk ? emotion : 'binhthuong'}
+					talk={crabTalk}
+					lf={lf}
+					style={{left: -40, top: crabTalk ? 600 : 660, transform: `rotate(${4 + 4 * lean(!guestTurn)}deg)`}}
+				/>
 			</>
 		);
 	}
@@ -196,7 +225,7 @@ const Layout: React.FC<{scene: SceneData; crab: CrabConfig; talk: number; lf: nu
 				>
 					VS
 				</div>
-				<CornerCrab crab={crab} emotion={emotion} lf={lf} />
+				<CornerCrab crab={crab} emotion={emotion} lf={lf} talk={crabTalk} />
 			</>
 		);
 	}
@@ -252,7 +281,7 @@ const Layout: React.FC<{scene: SceneData; crab: CrabConfig; talk: number; lf: nu
 						/>
 					))}
 				</div>
-				<CornerCrab crab={crab} emotion={emotion} lf={lf} />
+				<CornerCrab crab={crab} emotion={emotion} lf={lf} talk={crabTalk} />
 			</>
 		);
 	}
@@ -284,7 +313,7 @@ const Layout: React.FC<{scene: SceneData; crab: CrabConfig; talk: number; lf: nu
 					style={{position: 'absolute', left: i === 0 ? 20 : 780, top: i === 0 ? 420 : 860}}
 				/>
 			))}
-			<CornerCrab crab={crab} emotion={emotion} lf={lf} />
+			<CornerCrab crab={crab} emotion={emotion} lf={lf} talk={crabTalk} />
 		</>
 	);
 };

@@ -40,6 +40,12 @@ FPS = 30
 SAMPLE_RATE = 24000
 GAP_SECONDS = 0.25
 EMOTIONS = {"vui", "buon", "ngacnhien", "binhthuong"}
+# Giọng nhân vật khách (spec.guest.voice) cho câu có "speaker": "guest": (giọng, tốc độ, cao độ)
+GUEST_VOICES = {
+    "nu": ("vi-VN-HoaiMyNeural", "+12%", "+0Hz"),
+    "be": ("vi-VN-HoaiMyNeural", "+18%", "+35Hz"),
+    "tram": ("vi-VN-NamMinhNeural", "+6%", "-28Hz"),
+}
 
 
 def parse_script(path: Path) -> list[dict]:
@@ -119,7 +125,7 @@ def align_words(text: str, boundaries: list[dict], offset: float, end: float) ->
     return out
 
 
-async def tts_to_pcm(text: str, voice: str, rate: str, tmp: Path) -> tuple[bytes, list[dict]]:
+async def tts_to_pcm(text: str, voice: str, rate: str, tmp: Path, pitch: str = "+0Hz") -> tuple[bytes, list[dict]]:
     """Trả về (PCM, danh sách WordBoundary {text, start, duration} tính bằng giây)."""
     mp3 = tmp / "line.mp3"
     # Dịch vụ edge-tts thỉnh thoảng trả về rỗng ngẫu nhiên -> thử lại vài lần
@@ -127,7 +133,7 @@ async def tts_to_pcm(text: str, voice: str, rate: str, tmp: Path) -> tuple[bytes
         try:
             words = []
             with open(mp3, "wb") as f:
-                async for chunk in edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary").stream():
+                async for chunk in edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, boundary="WordBoundary").stream():
                     if chunk["type"] == "audio":
                         f.write(chunk["data"])
                     elif chunk["type"] == "WordBoundary":
@@ -199,7 +205,10 @@ async def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         for i, line in enumerate(lines, 1):
             print(f"[{i}/{len(lines)}] {line['text']}")
-            audio, words = await tts_to_pcm(line["text"], args.voice, args.rate, Path(tmp))
+            voice, rate, pitch = args.voice, args.rate, "+0Hz"
+            if line.get("speaker") == "guest":
+                voice, rate, pitch = GUEST_VOICES.get((spec.get("guest") or {}).get("voice") or "nu", GUEST_VOICES["nu"])
+            audio, words = await tts_to_pcm(line["text"], voice, rate, Path(tmp), pitch)
             start = len(pcm) / 2 / SAMPLE_RATE
             pcm += audio
             end = len(pcm) / 2 / SAMPLE_RATE
@@ -225,6 +234,7 @@ async def main() -> None:
         },
         "hook": spec.get("hook"),
         "music": spec.get("music"),
+        "guest": spec.get("guest"),
         "fps": FPS,
         "duration": round(len(pcm) / 2 / SAMPLE_RATE, 3),
         "lines": lines,
