@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import {readPublishSettings} from '@viup/core';
 import {addDays, listDays, listVideos, localDate, PLATFORM_LABEL, PLATFORMS} from '@/lib/viup';
-import {deleteVideo, togglePosted} from './actions';
+import {deleteVideo, pushDraftsNow, togglePosted} from './actions';
 import {ActionButton, CopyButton} from './ui';
 
 export const dynamic = 'force-dynamic';
@@ -14,23 +15,37 @@ export default async function VideosPage({searchParams}: {searchParams: Promise<
 	const day = picked && /^\d{4}-\d{2}-\d{2}$/.test(picked) ? picked : today;
 	const days = [...new Set([...listDays().filter((d) => d >= addDays(today, -7)), today, addDays(today, 1)])].sort();
 	const videos = listVideos(day);
+	const draftOn = readPublishSettings();
+	const draftPlatforms = (['tiktok', 'youtube'] as const).filter((p) => draftOn[p]);
+	const missingDrafts = videos.some((v) => draftPlatforms.some((p) => !v.uploads[p]?.id));
 
 	return (
 		<>
 			<div className="days">
 				{days.map((d) => {
 					const n = listVideos(d);
-					const done = n.filter((v) => PLATFORMS.every((p) => v.posted[p])).length;
+					const done = n.filter((v) => PLATFORMS.some((p) => v.posted[p])).length;
 					return (
 						<Link key={d} href={d === today ? '/' : `/?day=${d}`} className={d === day ? 'day active' : 'day'}>
 							<span>{dayLabel(d, today)}</span>
 							<small>
-								{n.length} video{n.length ? ` · ${done} đăng xong` : ''}
+								{n.length} video{n.length ? ` · ${done} đã đăng` : ''}
 							</small>
 						</Link>
 					);
 				})}
 			</div>
+
+			{videos.length > 0 && missingDrafts && day >= today && (
+				<div className="card row">
+					<span className="muted">
+						Video ngày này chưa đẩy nháp hết. Lần tự chạy sẽ đẩy video <b>hôm nay</b>; muốn có sớm thì bấm.
+					</span>
+					<ActionButton action={pushDraftsNow.bind(null, day)} className="btn small">
+						⇪ Đẩy nháp {draftPlatforms.map((p) => PLATFORM_LABEL[p]).join(' + ')} ngay
+					</ActionButton>
+				</div>
+			)}
 
 			{videos.length === 0 ? (
 				<div className="card empty">
@@ -71,6 +86,38 @@ export default async function VideosPage({searchParams}: {searchParams: Promise<
 										<CopyButton text={v.description} label="Copy" />
 									</div>
 								</div>
+
+								{draftPlatforms.length > 0 && (
+									<div className="field">
+										<label>Nháp</label>
+										<div className="platforms small">
+											{draftPlatforms.map((p) => {
+												const u = v.uploads[p];
+												if (u?.id)
+													return p === 'youtube' ? (
+														<a key={p} className="badge ok" href={u.url} target="_blank" rel="noreferrer">
+															{v.posted.youtube ? '✓ Đã có trên YouTube' : '✓ YouTube riêng tư — mở Studio'}
+														</a>
+													) : (
+														<span key={p} className="badge ok" title="Mở app TikTok trên điện thoại → Hộp thư → thông báo video sẵn sàng">
+															{v.posted.tiktok ? '✓ Đã có trên TikTok' : '✓ Nháp TikTok (xem trên điện thoại)'}
+														</span>
+													);
+												if (u?.error)
+													return (
+														<span key={p} className="badge warn" title={u.error}>
+															✗ {PLATFORM_LABEL[p]} lỗi — sẽ thử lại
+														</span>
+													);
+												return (
+													<span key={p} className="badge">
+														{PLATFORM_LABEL[p]}: chưa đẩy
+													</span>
+												);
+											})}
+										</div>
+									</div>
+								)}
 
 								<div className="field">
 									<label>Đã đăng</label>

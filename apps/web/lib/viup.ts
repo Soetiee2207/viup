@@ -3,7 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {existsSync, readdirSync, readFileSync, statSync, writeFileSync} from 'node:fs';
 import {join, resolve, sep} from 'node:path';
 import {and, gte, inArray, sql} from 'drizzle-orm';
-import {findRepoRoot, schema, type Db} from '@viup/core';
+import {findRepoRoot, parseCaption, readUploads, schema, type Db, type Uploads} from '@viup/core';
 
 export const root = findRepoRoot();
 export const videosDir = join(root, 'videos');
@@ -50,35 +50,30 @@ export type VideoItem = {
 	caption: string;
 	description: string;
 	posted: Partial<Record<Platform, boolean>>;
+	uploads: Uploads[string];
 	sizeMb: number;
-};
-
-// Tách các mục trong file .txt do `npm run make` tạo
-const section = (txt: string, header: string) => {
-	const i = txt.indexOf(`${header}\n`);
-	if (i < 0) return '';
-	return txt.slice(i + header.length + 1).split(/\n\n/)[0].trim();
 };
 
 export const listVideos = (day: string): VideoItem[] => {
 	const dir = safeVideoPath(day);
 	if (!existsSync(dir)) return [];
 	const posted = readPosted(day);
+	const uploads = readUploads(day);
 	return readdirSync(dir)
 		.filter((f) => f.endsWith('.mp4'))
 		.sort((a, b) => parseInt(a) - parseInt(b))
 		.map((file) => {
 			const txtPath = join(dir, file.replace(/\.mp4$/, '.txt'));
-			const txt = existsSync(txtPath) ? readFileSync(txtPath, 'utf8') : '';
-			const youtubeTitle = section(txt, 'YouTube (tiêu đề):');
+			const c = parseCaption(existsSync(txtPath) ? readFileSync(txtPath, 'utf8') : '');
 			return {
 				file,
 				name: file.replace(/\.mp4$/, ''),
-				topic: txt.match(/^Chủ đề: (.*)$/m)?.[1] ?? youtubeTitle.replace(/ #Shorts$/, ''),
-				youtubeTitle,
-				caption: section(txt, 'TikTok / Facebook (caption):'),
-				description: txt.includes('Mô tả YouTube:\n') ? txt.slice(txt.indexOf('Mô tả YouTube:\n') + 15).split('\n\nNhớ bật')[0].trim() : '',
+				topic: c.topic,
+				youtubeTitle: c.youtubeTitle,
+				caption: c.caption,
+				description: c.description,
 				posted: posted[file] ?? {},
+				uploads: uploads[file] ?? {},
 				sizeMb: statSync(join(dir, file)).size / 1e6,
 			};
 		});

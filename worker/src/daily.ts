@@ -1,5 +1,6 @@
 // Phase 4: chạy hằng ngày (systemd timer gọi, xem install-timer.ts):
-// làm đủ video cho hôm nay + ngày mai (make --auto --days 2), ghi log, báo kết quả, dọn video cũ.
+// làm đủ video cho hôm nay + ngày mai (make --auto --days 2), đẩy nháp TikTok/YouTube video hôm nay, lấy số liệu,
+// ghi log, báo kết quả, dọn video cũ.
 // Chạy tay: npm run daily
 import {spawn} from 'node:child_process';
 import {appendFileSync, closeSync, existsSync, mkdirSync, openSync, readdirSync, rmSync, statSync, unlinkSync} from 'node:fs';
@@ -50,15 +51,10 @@ if (existsSync(lock) && Date.now() - statSync(lock).mtimeMs < 3 * 3600_000) {
 }
 closeSync(openSync(lock, 'w'));
 
-const countVideos = (day: string) => {
-	const dir = join(root, 'videos', day);
-	return existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.mp4')).length : 0;
-};
-
-try {
-	log('=== Bắt đầu: làm video cho hôm nay + ngày mai ===');
-	const code = await new Promise<number>((resolve) => {
-		const p = spawn(process.execPath, [join(root, 'packages/brain/src/make.ts'), '--auto', '--days', '2', '--ahead', '1'], {cwd: root});
+// Chạy 1 bước (script node) và chép output vào log
+const step = (args: string[]) =>
+	new Promise<number>((resolve) => {
+		const p = spawn(process.execPath, args, {cwd: root});
 		const onData = (b: Buffer) => {
 			// Bỏ dòng tiến độ render cho log gọn
 			for (const line of b.toString().split('\n')) if (line.trim() && !/^(Encoded|Rendered|Bundl|Getting|Composition|Codec|Concurrency|\[\d+\/\d+\])/.test(line)) log(line);
@@ -67,6 +63,21 @@ try {
 		p.stderr.on('data', onData);
 		p.on('close', (c) => resolve(c ?? 1));
 	});
+
+const countVideos = (day: string) => {
+	const dir = join(root, 'videos', day);
+	return existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.mp4')).length : 0;
+};
+
+try {
+	log('=== Bắt đầu: làm video cho hôm nay + ngày mai ===');
+	const code = await step(['packages/brain/src/make.ts', '--auto', '--days', '2', '--ahead', '1']);
+
+	// Đẩy video hôm nay vào nháp TikTok + YouTube (riêng tư), rồi lấy số liệu cho trang Thống kê.
+	// Chỉ đẩy ngày hôm nay: TikTok giới hạn số nháp đang chờ (~5/24h).
+	log('=== Đẩy nháp video hôm nay ===');
+	const drafts = await step(['packages/publish/src/cli.ts', 'drafts', today]);
+	await step(['packages/publish/src/cli.ts', 'stats']);
 
 	// Dọn thư mục ngày đã qua quá KEEP_DAYS ngày
 	const cutoff = new Date(Date.now() - KEEP_DAYS * 86_400_000).toLocaleDateString('sv');
@@ -82,7 +93,9 @@ try {
 	const tomorrow = new Date(Date.now() + 86_400_000).toLocaleDateString('sv');
 	const summary = `Hôm nay ${countVideos(today)} video, ngày mai ${countVideos(tomorrow)} video (thư mục videos/).`;
 	log(summary);
-	if (code === 0) await notify('viup: đã làm video', summary);
+	const draftNote = drafts === 0 ? 'Đã đẩy nháp TikTok + YouTube cho video hôm nay.' : 'Đẩy nháp có lỗi, xem log (lần chạy sau thử lại).';
+	log(draftNote);
+	if (code === 0) await notify('viup: đã làm video', `${summary}\n${draftNote}`);
 	else await notify('viup: chưa làm đủ video', `${summary}\nXem log: data/logs/${today}.log (thường do hết lượt Gemini, lần chạy sau sẽ làm bù).`);
 	log('=== Xong ===');
 } catch (e) {

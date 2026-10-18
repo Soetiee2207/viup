@@ -1,4 +1,4 @@
-import {schema} from '@viup/core';
+import {readPublishSettings, schema} from '@viup/core';
 import {getDb} from '@/lib/db';
 import {saveSettings} from '../actions';
 
@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 export default async function SettingsPage() {
 	const db = await getDb();
 	const [channel] = await db.select().from(schema.channels).limit(1);
+	const drafts = readPublishSettings();
 	const fun = Math.round((channel?.formats['fun-fact'] ?? 0.6) * 100);
 
 	return (
@@ -24,6 +25,14 @@ export default async function SettingsPage() {
 				<label className="check">
 					<input type="checkbox" name="active" defaultChecked={channel?.active ?? true} />
 					<span>Tự động làm video theo giờ (bỏ tick = tạm dừng)</span>
+				</label>
+				<label className="check">
+					<input type="checkbox" name="draftTiktok" defaultChecked={drafts.tiktok} />
+					<span>Tự đẩy video hôm nay vào nháp TikTok</span>
+				</label>
+				<label className="check">
+					<input type="checkbox" name="draftYoutube" defaultChecked={drafts.youtube} />
+					<span>Tự đẩy video hôm nay lên YouTube ở chế độ riêng tư</span>
 				</label>
 				<button className="btn primary">Lưu</button>
 			</form>

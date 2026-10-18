@@ -101,3 +101,21 @@ input, select { font: inherit; color: inherit; background: var(--bg); border: 1p
 	.video { grid-template-columns: 1fr; }
 	.video video { width: 100%; max-width: 280px; margin: 0 auto; display: block; }
 }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.stats .card { margin-bottom: 16px; }
+.hero { font-size: 34px; font-weight: 700; line-height: 1.2; margin: 4px 0; font-variant-numeric: tabular-nums; }
+.advice { background: var(--code); border-radius: 10px; padding: 10px 12px; margin: 4px 0 14px; line-height: 1.5; }
+.warnbox { border-color: var(--warn); }
+th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); padding: 6px; border-bottom: 1px solid var(--border); }
+th.num { text-align: right; }
+caption { text-align: left; padding-bottom: 6px; }
+.bars td { vertical-align: middle; }
+.barlabel { white-space: nowrap; width: 1%; padding-right: 12px; }
+.bar { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.bar span { display: block; height: 14px; background: var(--accent); border-radius: 0 4px 4px 0; }
+.bar b { font-weight: 500; font-variant-numeric: tabular-nums; }
+td.num { font-variant-numeric: tabular-nums; }
+.tablewrap { overflow-x: auto; }
+.badge.tiktok { background: color-mix(in srgb, var(--text) 10%, transparent); }
+.badge.youtube { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }

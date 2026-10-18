@@ -15,6 +15,7 @@ import {existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync} from 'n
 import {join, relative} from 'node:path';
 import {parseArgs} from 'node:util';
 import {createDb, ensureDefaultChannel, findRepoRoot, loadEnv, migrateDb, schema} from '@viup/core';
+import {captionText, suggestHooks} from './captions.ts';
 import {FORMATS} from './formats.ts';
 import {usage} from './gemini.ts';
 import {discoverIdeas, listIdeas, nextIdea, planFormats} from './ideas.ts';
@@ -86,6 +87,10 @@ const nextOpenDay = () => {
 };
 
 // 1 chủ đề -> kịch bản (QA) -> MP4 trong videos/<day>/. Trả về false nếu chủ đề bị bỏ.
+// Dòng thông tin cơ bản cho mô tả: 📌 Hoa xác thối (Amorphophallus titanum) — rừng mưa Sumatra, Indonesia
+const aboutLine = (s: {name: string; scientificName?: string; where?: string}) =>
+	s.name && (s.scientificName || s.where) ? `📌 ${s.name}${s.scientificName ? ` (${s.scientificName})` : ''}${s.where ? ` — ${s.where}` : ''}` : '';
+
 const produce = async (topic: string, format: string, day: string, sources?: Source[]) => {
 	let result;
 	try {
@@ -121,26 +126,8 @@ const produce = async (topic: string, format: string, day: string, sources?: Sou
 	const manifest = JSON.parse(readFileSync(join(videoDir, 'public', 'manifest.json'), 'utf8'));
 	await db.insert(schema.videos).values({scriptId: result.scriptId, path: out, durationSec: manifest.duration});
 	const {title} = result.draft;
-	writeFileSync(
-		join(dayDir, `${base}.txt`),
-		`Ngày đăng: ${day}
-Chủ đề: ${topic}
-
-YouTube (tiêu đề):
-${title} #Shorts
-
-TikTok / Facebook (caption):
-${title} #CrabVibe #fyp #xuhuong
-
-Mô tả YouTube:
-${result.draft.spec.lines.map((l) => l.text).join(' ')}
-
-Crab vibe — video tạo tự động (nội dung có hỗ trợ AI).
-#Shorts #CrabVibe
-
-Nhớ bật nhãn "nội dung do AI tạo" khi đăng.
-`,
-	);
+	const hooks = await suggestHooks(db, {title, topic, format});
+	writeFileSync(join(dayDir, `${base}.txt`), captionText({day, topic, format, title, script: result.draft.spec.lines.map((l) => l.text).join(' '), hooks, about: aboutLine(result.draft.subject)}));
 	console.log(`✓ Xong: ${relative(root, out)} (${manifest.duration.toFixed(1)} giây) — đăng ngày ${day}`);
 	console.log(`  Caption: ${relative(root, join(dayDir, `${base}.txt`))}`);
 	return true;

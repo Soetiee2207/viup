@@ -6,7 +6,7 @@ import {rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {eq} from 'drizzle-orm';
 import {revalidatePath} from 'next/cache';
-import {ensureDefaultChannel, schema} from '@viup/core';
+import {ensureDefaultChannel, schema, writePublishSettings} from '@viup/core';
 import {getDb} from '@/lib/db';
 import {isRunning, PLATFORMS, readPosted, root, safeVideoPath, writePosted, type Platform} from '@/lib/viup';
 
@@ -83,5 +83,20 @@ export async function saveSettings(formData: FormData) {
 		.update(schema.channels)
 		.set({videosPerDay: perDay, formats: {'fun-fact': fun, zodiac: Math.round((1 - fun) * 100) / 100}, active: formData.get('active') === 'on'})
 		.where(eq(schema.channels.id, channel.id));
+	writePublishSettings({tiktok: formData.get('draftTiktok') === 'on', youtube: formData.get('draftYoutube') === 'on'});
 	revalidatePath('/', 'layout');
+}
+
+// Đẩy nháp TikTok + YouTube cho 1 ngày ngay (không đợi giờ tự chạy)
+export async function pushDraftsNow(day: string) {
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+	runDetached('packages/publish/src/cli.ts', ['drafts', day]);
+	await new Promise((r) => setTimeout(r, 500));
+	revalidatePath('/');
+}
+
+export async function refreshStatsNow() {
+	runDetached('packages/publish/src/cli.ts', ['stats']);
+	await new Promise((r) => setTimeout(r, 4000));
+	revalidatePath('/stats');
 }

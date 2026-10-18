@@ -7,7 +7,8 @@ import type {Source} from './source.ts';
 import {iconNames, LIMITS} from './validate.ts';
 
 export type Fact = {claim: string; evidence: string};
-export type Draft = {title: string; spec: VideoSpec; facts: Fact[]; covered: boolean};
+export type Subject = {name: string; scientificName?: string; where?: string};
+export type Draft = {title: string; spec: VideoSpec; facts: Fact[]; covered: boolean; subject: Subject};
 
 const EMOTIONS = ['vui', 'buon', 'ngacnhien', 'binhthuong'];
 const LAYOUTS = ['crab-closeup', 'crab-presents', 'object-hero', 'versus', 'count'];
@@ -61,8 +62,18 @@ const SCHEMA = {
 			},
 		},
 		covered: {type: 'boolean', description: 'false nếu NGUỒN không có thông tin trả lời đúng chủ đề'},
+		subject: {
+			type: 'object',
+			description: 'Đối tượng chính của video, lấy từ nguồn',
+			properties: {
+				name: {type: 'string', description: 'Tên gọi phổ biến (tiếng Việt nếu có)'},
+				scientificName: {type: 'string', description: 'Tên khoa học nếu là sinh vật, không có thì để trống'},
+				where: {type: 'string', description: 'Sống / xuất hiện ở đâu, ngắn gọn; không có thì để trống'},
+			},
+			required: ['name'],
+		},
 	},
-	required: ['covered', 'title', 'hook', 'lines', 'facts'],
+	required: ['covered', 'title', 'hook', 'subject', 'lines', 'facts'],
 };
 
 const SYSTEM = `Bạn là biên kịch YouTube Shorts tiếng Việt cho kênh "Crab vibe". Người dẫn chuyện là một chú cua dễ thương, lanh lợi (mascot cung Cự Giải), xưng "Cua" hoặc không xưng, gọi người xem là "bạn".
@@ -117,19 +128,19 @@ ${iconNames().join(', ')}`;
 		prompt += `
 
 --- BẢN NHÁP TRƯỚC (bị trả lại) ---
-${JSON.stringify({title: feedback.draft.title, ...feedback.draft.spec, facts: feedback.draft.facts})}
+${JSON.stringify({title: feedback.draft.title, subject: feedback.draft.subject, ...feedback.draft.spec, facts: feedback.draft.facts})}
 
 --- LỖI CẦN SỬA ---
 ${feedback.problems.map((p) => `- ${p}`).join('\n')}
 
 Viết lại kịch bản, sửa HẾT các lỗi trên, giữ những phần tốt.`;
 	}
-	const out = await generateJson<{covered: boolean; title: string; hook: string; lines: VideoSpec['lines']; facts: Fact[]}>(db, {
+	const out = await generateJson<{covered: boolean; title: string; hook: string; subject?: Subject; lines: VideoSpec['lines']; facts: Fact[]}>(db, {
 		system: SYSTEM,
 		prompt,
 		schema: SCHEMA,
 		temperature: feedback ? 0.6 : 0.9,
 	});
-	const {title, facts, covered, ...spec} = out;
-	return {title: title.trim(), facts: facts ?? [], covered: covered !== false, spec};
+	const {title, facts, covered, subject, ...spec} = out;
+	return {title: title.trim(), facts: facts ?? [], covered: covered !== false, subject: subject ?? {name: ''}, spec};
 };

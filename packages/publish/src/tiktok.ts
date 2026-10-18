@@ -4,9 +4,9 @@ import {spawn} from 'node:child_process';
 import {createHash, randomBytes} from 'node:crypto';
 import {closeSync, existsSync, openSync, readFileSync, readSync, statSync, writeFileSync} from 'node:fs';
 import {createServer} from 'node:http';
-import {secretsPath} from '@viup/core';
+import {secretsPath, type StatItem} from '@viup/core';
 
-const SCOPES = ['user.info.basic', 'video.upload'];
+const SCOPES = ['user.info.basic', 'video.upload', 'video.list']; // video.list: lấy lượt xem cho trang Thống kê
 // Phải trùng y nguyên Redirect URI (tab Desktop) đã khai trong TikTok developer portal
 const PORT = 8723;
 const REDIRECT_URI = `http://localhost:${PORT}/callback/`;
@@ -154,4 +154,30 @@ export const tiktokUpload = async (file: string) => {
 		await new Promise((r) => setTimeout(r, 3000));
 	}
 	return {publishId: init.publish_id as string, status: 'PROCESSING_UPLOAD'};
+};
+
+// Số liệu các video đã đăng công khai trên tài khoản (cần quyền video.list: bật trong TikTok developer rồi chạy lại npm run tt:auth)
+export const tiktokStats = async (): Promise<StatItem[]> => {
+	const token = await accessToken();
+	const fields = 'id,title,video_description,create_time,share_url,view_count,like_count,comment_count,share_count';
+	const items: StatItem[] = [];
+	let cursor: number | undefined;
+	for (let page = 0; page < 10; page++) {
+		const d = await tiktokApi(token, 'POST', `/v2/video/list/?fields=${fields}`, {max_count: 20, ...(cursor ? {cursor} : {})});
+		for (const v of d.videos ?? [])
+			items.push({
+				platform: 'tiktok',
+				id: v.id,
+				title: v.title || v.video_description || '(không tiêu đề)',
+				url: v.share_url,
+				publishedAt: new Date(v.create_time * 1000).toISOString(),
+				views: v.view_count ?? 0,
+				likes: v.like_count ?? 0,
+				comments: v.comment_count ?? 0,
+				shares: v.share_count ?? 0,
+			});
+		if (!d.has_more) break;
+		cursor = d.cursor;
+	}
+	return items;
 };

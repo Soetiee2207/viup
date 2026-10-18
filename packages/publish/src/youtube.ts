@@ -3,7 +3,7 @@ import {randomBytes, createHash} from 'node:crypto';
 import {existsSync, readFileSync, statSync, writeFileSync, createReadStream} from 'node:fs';
 import {createServer} from 'node:http';
 import {Readable} from 'node:stream';
-import {secretsPath} from '@viup/core';
+import {secretsPath, type StatItem} from '@viup/core';
 
 const SCOPES = ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.readonly'];
 const CLIENT_FILE = () => secretsPath('youtube_client.json');
@@ -117,9 +117,11 @@ export const youtubeUpload = async (video: YoutubeUpload) => {
 			containsSyntheticMedia: true, // gắn nhãn nội dung tạo bằng AI
 		},
 	};
-	const init = await fetch(
-		'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status',
-		{
+	// Đôi khi Google treo ~60s rồi trả 409 "already exists" (yêu cầu bị gửi lặp phía Google, để lại 1 video rỗng kẹt
+	// "đang xử lý") -> mở phiên upload mới, tối đa 3 lần
+	let location: string | null = null;
+	for (let attempt = 1; !location; attempt++) {
+		const init = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${token}`,
@@ -128,10 +130,10 @@ export const youtubeUpload = async (video: YoutubeUpload) => {
 				'X-Upload-Content-Length': String(size),
 			},
 			body: JSON.stringify(meta),
-		},
-	);
-	const location = init.headers.get('location');
-	if (!init.ok || !location) throw new Error(`YouTube khởi tạo upload lỗi ${init.status}: ${await init.text()}`);
+		});
+		location = init.ok ? init.headers.get('location') : null;
+		if (!location && (init.status !== 409 || attempt >= 3)) throw new Error(`YouTube khởi tạo upload lỗi ${init.status}: ${await init.text()}`);
+	}
 
 	const res = await fetch(location, {
 		method: 'PUT',
@@ -142,4 +144,43 @@ export const youtubeUpload = async (video: YoutubeUpload) => {
 	const body = await res.json();
 	if (!res.ok) throw new Error(`YouTube upload lỗi ${res.status}: ${JSON.stringify(body)}`);
 	return {id: body.id as string, url: `https://youtube.com/shorts/${body.id}`, privacy: body.status?.privacyStatus as string};
+};
+
+// Số liệu mọi video trên kênh (cả video đăng tay), tốn ~3 đơn vị hạn mức/50 video
+export const youtubeStats = async (): Promise<StatItem[]> => {
+	const token = await accessToken();
+	const get = async (path: string) => {
+		const res = await fetch(`https://www.googleapis.com/youtube/v3/${path}`, {headers: {Authorization: `Bearer ${token}`}});
+		const b = await res.json();
+		if (!res.ok) throw new Error(`YouTube ${path.split('?')[0]} lỗi ${res.status}: ${b.error?.message ?? ''}`);
+		return b;
+	};
+	const ch = await get('channels?part=contentDetails&mine=true');
+	const uploads = ch.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+	if (!uploads) return [];
+	const ids: string[] = [];
+	let pageToken = '';
+	for (let page = 0; page < 10; page++) {
+		const p = await get(`playlistItems?part=contentDetails&maxResults=50&playlistId=${uploads}${pageToken ? `&pageToken=${pageToken}` : ''}`);
+		ids.push(...p.items.map((i: {contentDetails: {videoId: string}}) => i.contentDetails.videoId));
+		if (!p.nextPageToken) break;
+		pageToken = p.nextPageToken;
+	}
+	const items: StatItem[] = [];
+	for (let i = 0; i < ids.length; i += 50) {
+		const v = await get(`videos?part=snippet,statistics,status&id=${ids.slice(i, i + 50).join(',')}`);
+		for (const x of v.items)
+			items.push({
+				platform: 'youtube',
+				id: x.id,
+				title: x.snippet.title,
+				url: `https://youtube.com/shorts/${x.id}`,
+				publishedAt: x.snippet.publishedAt,
+				privacy: x.status.privacyStatus,
+				views: Number(x.statistics.viewCount ?? 0),
+				likes: Number(x.statistics.likeCount ?? 0),
+				comments: Number(x.statistics.commentCount ?? 0),
+			});
+	}
+	return items;
 };

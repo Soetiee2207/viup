@@ -6,11 +6,11 @@ import {generateJson} from './gemini.ts';
 import type {Source} from './source.ts';
 import type {Draft} from './write.ts';
 
-const CRITERIA = ['topic', 'accuracy', 'safety', 'originality', 'hook', 'clarity'] as const;
+const CRITERIA = ['topic', 'accuracy', 'essentials', 'safety', 'originality', 'hook', 'clarity'] as const;
 type Criterion = (typeof CRITERIA)[number];
 
 // Điểm tối thiểu để đạt
-export const PASS: Record<Criterion, number> = {topic: 4, accuracy: 4, safety: 5, originality: 4, hook: 4, clarity: 3};
+export const PASS: Record<Criterion, number> = {topic: 4, accuracy: 4, essentials: 4, safety: 5, originality: 4, hook: 4, clarity: 3};
 
 export type QaReport = {
 	scores: Record<Criterion, number>;
@@ -36,6 +36,7 @@ const SYSTEM = `Bạn là biên tập viên kiểm duyệt nghiêm khắc cho k�
 Chấm từng tiêu chí từ 1 (rất tệ) đến 5 (xuất sắc). "issues": liệt kê lỗi CỤ THỂ, chỉ rõ câu nào và cách sửa (tiếng Việt). Điểm 5 thì issues rỗng.
 - topic: kịch bản có trả lời/nói ĐÚNG chủ đề được yêu cầu không? Lạc sang chủ đề khác (vd hỏi "hồng hạc" mà nói về "màu hồng") → 1.
 - accuracy: độ chính xác (xem quy tắc riêng bên dưới).
+- essentials: lời thoại có đủ thông tin cơ bản để người xem biết đang nói về cái gì (xem quy tắc riêng bên dưới). Chấm trên LỜI THOẠI (người xem chỉ nghe/đọc phụ đề).
 - safety: không chính trị, tôn giáo, lời khuyên y tế/tài chính, bạo lực, tình dục, người thật còn sống, thương hiệu, xúc phạm nhóm người, nội dung không hợp trẻ em. Có bất kỳ vi phạm nào → ≤ 3.
 - originality: không chép nguyên văn câu từ nguồn (≥ 8 chữ liên tiếp giống nguồn → ≤ 3), không sáo rỗng.
 - hook: câu đầu + chữ hook có khiến người xem lướt Shorts dừng lại trong 3 giây không? Chào hỏi/dẫn dắt dài → ≤ 2.
@@ -51,6 +52,9 @@ export const reviewScript = async (
 
 QUY TẮC ACCURACY CHO ĐỊNH DẠNG "${format.id}":
 ${format.accuracy}
+
+QUY TẮC ESSENTIALS:
+${format.essentials}
 
 --- KỊCH BẢN ---
 Hook (chữ to đầu video): ${draft.spec.hook ?? ''}

@@ -6,10 +6,10 @@ Kế hoạch & phase hiện tại: **docs/PLAN.md** — đọc trước khi làm
 ## Cấu trúc
 - `packages/core` — SQLite (libsql) + Drizzle: `schema.ts`, `db.ts` (createDb/migrateDb), `queue.ts` (hàng đợi job trong DB, retry backoff).
 - `worker` — vòng lặp lấy job → `src/handlers.ts` (mỗi bước pipeline = 1 job type); `src/daily.ts` + `src/install-timer.ts` = chạy hằng ngày bằng systemd timer.
-- `apps/web` — Next.js, app quản lý "viup" (port 3210): `app/page.tsx` (video theo ngày), `ideas/`, `settings/`, `logs/`, `actions.ts` (server actions), `lib/viup.ts` (đọc videos/, log, timer); `scripts/install-app.ts` cài thành app desktop. Next 16: đọc `node_modules/next/dist/docs/` trước khi sửa.
+- `apps/web` — Next.js, app quản lý "viup" (port 3210): `app/page.tsx` (video theo ngày), `stats/` (thống kê, giờ đăng), `ideas/`, `settings/`, `logs/`, `actions.ts` (server actions), `lib/viup.ts` (đọc videos/, log, timer); `scripts/install-app.ts` cài thành app desktop. Next 16: đọc `node_modules/next/dist/docs/` trước khi sửa.
 - `packages/video` — Remotion scene engine: `spec.json` (VideoSpec) → `src/timeline.ts` (chia beat, chọn mặc định) → `Short.tsx`/`Scene.tsx` (cảnh, máy quay, chuyển cảnh), `Prop.tsx` (đồ vật biết nói), `Background.tsx`, `Character.tsx` (cua); `scripts/render.ts` chạy cả chuỗi; render 1080×1920.
-- `packages/brain` — chủ đề → VideoSpec: `source.ts` (Wikipedia), `write.ts` (prompt viết), `validate.ts` (kiểm tra/tự sửa bằng code), `qa.ts` (QA bằng LLM), `pipeline.ts` (vòng viết lại + lưu DB), `gemini.ts` (gọi API + đếm hạn mức bảng `api_calls`), `formats.ts` (fun-fact, zodiac), `ideas.ts` (brainstorm + chấm + chống trùng ý tưởng); CLI `make.ts`.
-- `packages/publish` — YouTube OAuth + upload (`npm run yt:auth`, `npm run yt:upload`); token ở `secrets/`.
+- `packages/brain` — chủ đề → VideoSpec: `source.ts` (Wikipedia), `write.ts` (prompt viết), `validate.ts` (kiểm tra/tự sửa bằng code), `qa.ts` (QA bằng LLM), `pipeline.ts` (vòng viết lại + lưu DB), `gemini.ts` (gọi API + đếm hạn mức bảng `api_calls`), `formats.ts` (fun-fact, zodiac), `ideas.ts` (brainstorm + chấm + chống trùng ý tưởng), `captions.ts` (caption + hashtag từng nền tảng); CLI `make.ts`.
+- `packages/publish` — YouTube/TikTok OAuth + upload, `drafts.ts` (tự đẩy nháp), `stats.ts` (số liệu); token ở `secrets/`. `packages/core/src/videos.ts` = đọc caption, uploads.json, data/publish.json (bật/tắt đẩy nháp), data/stats.json.
 - `tools/tts/make_voice.py` — edge-tts (giọng nam NamMinh, +16%, −14 LUFS) → voice.wav + manifest.json (mốc từng từ); `tools/music/make_loop.py` / `make_sfx.py` — nhạc nền / SFX tự tổng hợp; `tools/cut_bg.py` — xoá nền ảnh Gemini.
 - `site/` — GitHub Pages (trang chủ, privacy, terms cho audit); deploy bằng Actions, Pages source phải là "GitHub Actions".
 - `docs/` — PLAN, GEMINI_PROMPTS (prompt vẽ nhân vật), SETUP_APIS.
@@ -26,6 +26,9 @@ npm run make -- --auto [--days N]   # tự chọn chủ đề (kho ý tưởng: 
 npm run app:install    # build giao diện + cài app desktop viup (chạy lại sau khi sửa apps/web)
 npm run daily          # làm video hôm nay + mai, log data/logs/; daily:install / daily:uninstall = hẹn giờ systemd
 npm run tt:auth && npm run tt:upload [file.mp4]   # TikTok: đẩy video vào nháp (Sandbox)
+npm run drafts [-- YYYY-MM-DD]   # đẩy video 1 ngày vào nháp TikTok + YouTube riêng tư (daily tự chạy cho hôm nay; nhớ trong videos/<ngày>/uploads.json)
+npm run stats          # lấy lượt xem YouTube + TikTok -> data/stats.json (trang Thống kê)
+npm run recaption [-- YYYY-MM-DD]   # viết lại caption/hashtag (packages/brain/src/captions.ts) cho video đã làm
 ```
 
 ## Quy ước

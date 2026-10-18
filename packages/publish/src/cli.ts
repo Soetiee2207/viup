@@ -2,6 +2,8 @@ import {existsSync, readdirSync, readFileSync, statSync} from 'node:fs';
 import {join} from 'node:path';
 import {parseArgs} from 'node:util';
 import {findRepoRoot, loadEnv} from '@viup/core';
+import {pushDrafts} from './drafts.ts';
+import {refreshStats} from './stats.ts';
 import {tiktokAuth, tiktokUpload} from './tiktok.ts';
 import {youtubeAuth, youtubeUpload} from './youtube.ts';
 
@@ -71,7 +73,21 @@ switch (command) {
 		if (existsSync(txt)) console.log(`Caption: xem ${txt}`);
 		break;
 	}
+	case 'drafts': {
+		// Đẩy nháp TikTok + YouTube (riêng tư) cho 1 ngày đăng, mặc định hôm nay
+		const day = positionals[0] ?? new Date().toLocaleDateString('sv');
+		const r = await pushDrafts(day);
+		console.log(`Xong ${day}: ${r.done.length} đã đẩy, ${r.failed.length} lỗi${r.done.length + r.failed.length ? '' : ' (không có gì mới)'}`);
+		if (r.failed.length) process.exitCode = 2;
+		break;
+	}
+	case 'stats': {
+		const s = await refreshStats();
+		for (const p of ['youtube', 'tiktok'])
+			console.log(`${p}: ${s.items.filter((i) => i.platform === p).length} video${s.errors[p] ? ` — lỗi: ${s.errors[p]}` : ''}`);
+		break;
+	}
 	default:
-		console.log('Lệnh: youtube:auth | youtube:upload [file.mp4] [--title "..."] [--description "..."] | tiktok:auth | tiktok:upload [file.mp4]');
+		console.log('Lệnh: drafts [YYYY-MM-DD] | stats | youtube:auth | youtube:upload [file.mp4] [--title "..."] [--description "..."] | tiktok:auth | tiktok:upload [file.mp4]');
 		process.exitCode = 1;
 }

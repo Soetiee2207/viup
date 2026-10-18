@@ -35,6 +35,7 @@ export function Nav() {
 	const path = usePathname();
 	const tabs = [
 		['/', 'Video'],
+		['/stats', 'Thống kê'],
 		['/ideas', 'Ý tưởng'],
 		['/settings', 'Cài đặt'],
 		['/logs', 'Nhật ký'],

@@ -4,6 +4,7 @@ import {channels} from './schema.ts';
 export * from './db.ts';
 export * from './queue.ts';
 export * from './env.ts';
+export * from './videos.ts';
 export * as schema from './schema.ts';
 export type {Channel, FormatWeights, Job} from './schema.ts';
 

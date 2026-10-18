@@ -20,6 +20,9 @@
     "daily:uninstall": "node worker/src/install-timer.ts uninstall",
     "tt:auth": "node packages/publish/src/cli.ts tiktok:auth",
     "tt:upload": "node packages/publish/src/cli.ts tiktok:upload",
+    "drafts": "node packages/publish/src/cli.ts drafts",
+    "stats": "node packages/publish/src/cli.ts stats",
+    "recaption": "node packages/brain/src/recaption.ts",
     "make": "node packages/brain/src/make.ts"
   },
   "devDependencies": {
