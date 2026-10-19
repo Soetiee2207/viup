@@ -1,7 +1,7 @@
 import {existsSync, readdirSync, readFileSync, statSync} from 'node:fs';
 import {join} from 'node:path';
 import {parseArgs} from 'node:util';
-import {findRepoRoot, loadEnv} from '@viup/core';
+import {findRepoRoot, loadEnv, readCaption} from '@viup/core';
 import {pushDrafts} from './drafts.ts';
 import {refreshStats} from './stats.ts';
 import {tiktokAuth, tiktokUpload} from './tiktok.ts';
@@ -32,11 +32,16 @@ switch (command) {
 			console.error(`Không thấy file ${file} — render trước: npm run render -w @viup/video`);
 			process.exit(1);
 		}
-		const lines: {text: string}[] = JSON.parse(readFileSync(join(video, 'public', 'manifest.json'), 'utf8')).lines;
-		const title = values.title ?? `${lines[0].text.slice(0, 90)} #Shorts`;
+		// Có file .txt caption cạnh MP4 (videos/<ngày>/) thì lấy tiêu đề/mô tả từ đó;
+		// không thì lấy từ manifest — manifest là của video render GẦN NHẤT, chỉ đúng với out/short.mp4
+		const caption = readCaption(file);
+		const lines: {text: string}[] = caption.youtubeTitle ? [] : JSON.parse(readFileSync(join(video, 'public', 'manifest.json'), 'utf8')).lines;
+		const title = values.title ?? (caption.youtubeTitle || `${lines[0].text.slice(0, 90)} #Shorts`);
 		const description =
 			values.description ??
-			`${lines.map((l) => l.text).join(' ')}\n\nCrab vibe — video tạo tự động bằng viup (nội dung có hỗ trợ AI).\n#Shorts #CrabVibe`;
+			(caption.youtubeTitle
+				? caption.description
+				: `${lines.map((l) => l.text).join(' ')}\n\nCrab vibe — video tạo tự động bằng viup (nội dung có hỗ trợ AI).\n#Shorts #CrabVibe`);
 		console.log(`Đang upload ${file}\nTiêu đề: ${title}`);
 		const result = await youtubeUpload({
 			file,
