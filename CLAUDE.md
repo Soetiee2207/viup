@@ -1,18 +1,18 @@
 # viup
 
 Tool **tự động 100%** làm video Short hoạt hình 2D (mascot: chú cua Cự Giải) cho YouTube Shorts / FB Reels / TikTok.
-Kế hoạch & phase hiện tại: **docs/PLAN.md** — đọc trước khi làm, chỉ làm phase được giao. Phase 1–5 xong (Phase 4 = systemd timer chạy `npm run daily` 7:00 + 15:30; Phase 5 = app desktop viup). Facebook/YouTube công khai đang đăng tay (tài khoản FB quá mới để đăng ký Meta developer; YouTube chờ audit). Trả lời & viết tài liệu bằng **tiếng Việt**.
+Kế hoạch & phase hiện tại: **docs/PLAN.md** — đọc trước khi làm, chỉ làm phase được giao. Phase 1–5 xong (Phase 4 = systemd timer chạy `npm run daily` 7:00 + 15:30; Phase 5 = app desktop viup); Phase 6 bán tự động (tự đẩy nháp TikTok + YouTube riêng tư, người dùng bấm đăng); Phase 7 mới có trang Thống kê. Facebook/YouTube công khai đang đăng tay (tài khoản FB quá mới để đăng ký Meta developer; YouTube chờ audit). Trả lời & viết tài liệu bằng **tiếng Việt**.
 
 ## Cấu trúc
 - `packages/core` — SQLite (libsql) + Drizzle: `schema.ts`, `db.ts` (createDb/migrateDb), `queue.ts` (hàng đợi job trong DB, retry backoff).
 - `worker` — vòng lặp lấy job → `src/handlers.ts` (mỗi bước pipeline = 1 job type); `src/daily.ts` + `src/install-timer.ts` = chạy hằng ngày bằng systemd timer.
 - `apps/web` — Next.js, app quản lý "viup" (port 3210): `app/page.tsx` (video theo ngày), `stats/` (thống kê, giờ đăng), `ideas/`, `settings/`, `logs/`, `actions.ts` (server actions), `lib/viup.ts` (đọc videos/, log, timer); `scripts/install-app.ts` cài thành app desktop. Next 16: đọc `node_modules/next/dist/docs/` trước khi sửa.
-- `packages/video` — Remotion scene engine: `spec.json` (VideoSpec) → `src/timeline.ts` (chia beat, chọn mặc định) → `Short.tsx`/`Scene.tsx` (cảnh, máy quay, chuyển cảnh), `Prop.tsx` (đồ vật biết nói), `Background.tsx`, `Character.tsx` (cua); `scripts/render.ts` chạy cả chuỗi; render 1080×1920.
-- `packages/brain` — chủ đề → VideoSpec: `source.ts` (Wikipedia), `write.ts` (prompt viết), `validate.ts` (kiểm tra/tự sửa bằng code), `qa.ts` (QA bằng LLM), `pipeline.ts` (vòng viết lại + lưu DB), `gemini.ts` (gọi API + đếm hạn mức bảng `api_calls`), `formats.ts` (fun-fact, zodiac), `ideas.ts` (brainstorm + chấm + chống trùng ý tưởng), `captions.ts` (caption + hashtag từng nền tảng); CLI `make.ts`.
+- `packages/video` — Remotion scene engine: `spec.json` (VideoSpec) → `src/timeline.ts` (chia beat, chọn mặc định) → `Short.tsx`/`Scene.tsx` (cảnh, máy quay, chuyển cảnh, layout `dialogue` cua + khách), `Prop.tsx` (đồ vật biết nói), `Background.tsx`, `Character.tsx` (cua); `scripts/render.ts` chạy cả chuỗi; render 1080×1920.
+- `packages/brain` — chủ đề → VideoSpec: `source.ts` (Wikipedia), `write.ts` (prompt viết), `validate.ts` (kiểm tra/tự sửa bằng code), `qa.ts` (QA bằng LLM), `pipeline.ts` (vòng viết lại + lưu DB), `gemini.ts` (gọi API + đếm hạn mức bảng `api_calls`), `formats.ts` (fun-fact kể chuyện có nhân vật khách, zodiac), `ideas.ts` (brainstorm + chấm + chống trùng ý tưởng), `captions.ts` (caption + hashtag từng nền tảng); CLI `make.ts`.
 - `packages/publish` — YouTube/TikTok OAuth + upload, `drafts.ts` (tự đẩy nháp), `stats.ts` (số liệu); token ở `secrets/`. `packages/core/src/videos.ts` = đọc caption, uploads.json, data/publish.json (bật/tắt đẩy nháp), data/stats.json.
-- `tools/tts/make_voice.py` — edge-tts (giọng nam NamMinh, +16%, −14 LUFS) → voice.wav + manifest.json (mốc từng từ); `tools/music/make_loop.py` / `make_sfx.py` — nhạc nền / SFX tự tổng hợp; `tools/cut_bg.py` — xoá nền ảnh Gemini.
+- `tools/tts/make_voice.py` — edge-tts (cua: NamMinh +16%; khách theo `guest.voice` nu/be/tram; −14 LUFS) → voice.wav + manifest.json (mốc từng từ); `tools/music/make_loop.py` / `make_sfx.py` — nhạc nền / SFX tự tổng hợp; `tools/cut_bg.py` — xoá nền ảnh Gemini.
 - `site/` — GitHub Pages (trang chủ, privacy, terms cho audit); deploy bằng Actions, Pages source phải là "GitHub Actions".
-- `docs/` — PLAN, GEMINI_PROMPTS (prompt vẽ nhân vật), SETUP_APIS.
+- `docs/` — PLAN (phase + kết quả từng phase), GEMINI_PROMPTS (prompt vẽ nhân vật), SETUP_APIS (trạng thái từng API). Tài liệu từng package: `packages/brain/README.md`, `packages/video/README.md`.
 
 ## Lệnh
 ```bash

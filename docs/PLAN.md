@@ -28,7 +28,7 @@
 - Mascot chính của kênh là **một chú cua** (chủ kênh cung Cự Giải). Đây là nhận diện thương hiệu, xuất hiện trong mọi video.
 - **Thiết kế cho hoạt hình cắt ghép:** mắt nằm trên **cuống mắt**. Gemini vẽ quả cầu mắt trắng trơn, code vẽ con ngươi và chớp mắt; miệng do code vẽ trên thân. Hai **càng** là lớp ảnh riêng để code vẫy, kẹp, giơ lên.
 - Prompt vẽ nhân vật nằm trong [`docs/GEMINI_PROMPTS.md`](GEMINI_PROMPTS.md). Phase 1 thêm hỗ trợ lớp càng riêng.
-- Có thể thêm nhân vật phụ (sinh vật biển khác) để làm dạng hội thoại.
+- ✅ (2026-10-19) Video fun-fact có **nhân vật khách** được nhân hoá (icon + giọng riêng) nói chuyện với cua. Xem Phase 2b.
 
 ## 1c. Chủ đề (chốt 2026-10-13)
 
@@ -36,7 +36,7 @@ Một kênh, mascot cua, xen kẽ 2 **định dạng nội dung** (format), tỉ
 
 | Format | Tỉ lệ ban đầu | Ví dụ | Nguồn |
 |---|---|---|---|
-| `fun-fact` — sự thật thú vị | 60% | "Bạch tuộc có 3 trái tim", "Vì sao mèo sợ dưa chuột?" | Wikipedia, Reddit TIL, trang khoa học phổ thông |
+| `fun-fact` — sự thật thú vị, kể chuyện | 60% | "Mưa có mùi gì?", "Mèo có mấy ngón chân?" | Wikipedia (vi + en) |
 | `zodiac` — cung hoàng đạo & tâm lý vui | 40% | "3 cung dễ ghen nhất", "Cự Giải khi giận sẽ…" | LLM sinh ý tưởng theo bộ khung chủ đề, không cần crawl |
 
 - Tránh: tin nóng, sức khoẻ, tài chính, chính trị, drama người thật (AI viết sai khi không có người duyệt là rủi ro lớn).
@@ -50,40 +50,23 @@ Dùng TypeScript cho hầu hết hệ thống (chung với Remotion). Python ch�
 
 ```
 viup/
-├─ apps/web/          Next.js — dashboard cấu hình & giám sát
-├─ worker/            Node — lịch chạy (cron) + hàng đợi job + các bước pipeline
+├─ apps/web/          Next.js — app desktop "viup": video theo ngày, thống kê, ý tưởng, cài đặt, nhật ký
+├─ worker/            daily.ts (systemd timer 7:00 + 15:30) + hàng đợi job cho nút bấm trên web
 ├─ packages/
-│  ├─ core/           schema DB (SQLite + Drizzle), kiểu dữ liệu chung, cấu hình
-│  ├─ brain/          gọi Gemini: chấm ý tưởng, viết kịch bản, QA (prompt + JSON schema)
-│  ├─ sources/        crawler: Google Trends RSS, Reddit, RSS báo, Wikipedia, YouTube trending
-│  ├─ video/          Remotion (phát triển từ prototype/): render từ VideoSpec JSON
-│  └─ publish/        YouTube / Facebook / TikTok uploader
-├─ tools/tts/         make_voice.py (edge-tts, mốc thời gian từng từ)
-├─ assets/            thư viện nhân vật, nền, nhạc (tạo 1 lần)
-└─ data/              viup.db, video đã render
+│  ├─ core/           schema DB (SQLite + Drizzle), hàng đợi job, đọc videos/ (caption, uploads, stats)
+│  ├─ brain/          Gemini: ý tưởng, nguồn Wikipedia, viết kịch bản, QA, caption + hashtag
+│  ├─ video/          Remotion scene engine: VideoSpec JSON -> MP4
+│  └─ publish/        YouTube / TikTok: OAuth, đẩy nháp, lấy số liệu
+├─ tools/             tts/make_voice.py (edge-tts), music/ (nhạc nền, SFX), cut_bg.py
+├─ site/              GitHub Pages: trang chủ, privacy, terms
+├─ secrets/           token OAuth (gitignored)
+├─ data/              viup.db, logs/, publish.json (bật/tắt đẩy nháp), stats.json (gitignored)
+└─ videos/<ngày>/     N-slug.mp4 + N-slug.txt (caption), uploads.json, posted.json
 ```
 
 - **Hàng đợi job:** bảng `jobs` trong SQLite, có `status`, `attempts`, `run_after`. Không cần Redis. Mỗi bước pipeline là một job, lỗi thì tự thử lại có backoff.
 - **Thứ tự dữ liệu:** `Channel` (ngách, giọng, nhân vật, lịch đăng) → `Idea` → `Script` → `Video` → `Post` → `Metrics`.
-- **VideoSpec (JSON):** hợp đồng giữa phần "não" (brain) và phần dựng video. LLM sinh ra spec, Remotion render spec. Tách như vậy để test riêng từng phía.
-
-```jsonc
-{
-  "character": "octopus",
-  "background": "ocean",
-  "music": "calm-01",
-  "lines": [
-    {
-      "text": "Bạn có biết bạch tuộc có 3 trái tim?",
-      "emotion": "ngacnhien",
-      "props": [{"icon": "heart", "count": 3, "anim": "pop"}]
-    }
-  ],
-  "title": "...",
-  "description": "...",
-  "hashtags": ["..."]
-}
-```
+- **VideoSpec (JSON):** hợp đồng giữa phần "não" (brain) và phần dựng video. LLM sinh ra spec, Remotion render spec. Tách như vậy để test riêng từng phía. Định dạng hiện tại xem `packages/video/README.md` (hook, music, guest, lines → speaker/emotion/beats). Tiêu đề và caption nằm ở file `.txt` cạnh MP4, không nằm trong spec.
 
 ---
 
@@ -95,13 +78,13 @@ viup/
 - **Đăng ký ngay** API YouTube, TikTok, Facebook và gửi audit, vì phải chờ duyệt lâu (xem mục 4).
 - ✅ Xong khi: `npm run dev` chạy được web và worker rỗng; DB được tạo.
 
-### Phase 6a — Upload tối thiểu (làm sớm, phục vụ audit) — 🚧 YouTube ✅ (2026-10-14), TikTok chờ key
+### Phase 6a — Upload tối thiểu (làm sớm, phục vụ audit) — ✅ YouTube (2026-10-14), TikTok Sandbox (2026-10-16)
 - Trang Privacy Policy + Terms trên GitHub Pages.
 - CLI: OAuth YouTube → upload 1 video riêng tư; TikTok: gửi video vào hộp nháp (Upload API).
 - Quay video demo để nộp audit (xem docs/SETUP_APIS.md).
 - ✅ Xong khi: upload thành công trên cả 2 nền tảng ở chế độ riêng tư/nháp.
 
-### Phase 1 — Video engine v2: "scene engine" (từ VideoSpec ra MP4) — 🚧 code xong (2026-10-15), chờ người dùng xem và duyệt
+### Phase 1 — Video engine v2: "scene engine" (từ VideoSpec ra MP4) — ✅ (2026-10-15)
 
 **Đã có:** bố cục dẫn chương trình (bảng icon ở trên, phụ đề giữa, cua ở dưới), icon Fluent Emoji Flat (`scripts/icons.ts`), nhạc nền tự tổng hợp + ducking (`tools/music/make_loop.py`), giọng nam NamMinh +16%, chuẩn hoá −14 LUFS.
 
@@ -143,9 +126,9 @@ viup/
 **Kết quả (2026-10-15):** làm đủ 8 mục trên (xem packages/video/README.md). Beat có thêm trường `from` (cụm từ mở đầu beat) để chỉ định chỗ cắt. `versus` chỉ dùng khi spec ghi rõ. Spec mẫu: `packages/video/spec.json`. Render 22 giây mất ~40 giây; `npm run stills` ~30 giây.
 **Chưa làm:** lớp càng cua riêng (chưa có ảnh); toạ độ mặt mới chỉnh cho ~20 icon.
 
-**Để sau / Mức 2 (tốn phí, chỉ làm khi Mức 1 chưa đủ):** dùng Gemini API vẽ tranh cảnh riêng cho từng beat (phải tra giá ảnh API trước). Ngoài ra còn: 2 nhân vật hội thoại, thư viện asset `assets/characters/<tên>/`.
+**Để sau / Mức 2 (tốn phí, chỉ làm khi Mức 1 chưa đủ):** dùng Gemini API vẽ tranh cảnh riêng cho từng beat (phải tra giá ảnh API trước). Hội thoại 2 nhân vật đã làm bằng icon (Phase 2b).
 
-### Phase 2 — Brain (từ chủ đề ra VideoSpec)
+### Phase 2 — Brain (từ chủ đề ra VideoSpec) — ✅ (2026-10-16)
 - Gemini API: `writeScript(idea, channel)` trả về VideoSpec, ép output theo JSON schema.
 - **QA tự động** thay cho người duyệt. Một lượt LLM thứ hai kiểm tra:
   - nội dung có khớp với nguồn crawl không (chống bịa), độ dài;
@@ -155,10 +138,27 @@ viup/
 - Bộ đếm hạn mức API và tự giãn tốc độ khi gần chạm free tier.
 - ✅ Xong khi: `npm run make -- "chủ đề"` ra MP4 hoàn chỉnh, không chạm tay.
 
-**Kết quả (2026-10-15):** code xong, chờ người dùng duyệt (xem packages/brain/README.md). Chủ đề → model lite đoán tên bài Wikipedia → lấy bài vi + en (giữ đoạn liên quan) → viết → kiểm tra bằng code (tự sửa icon, beat) → QA 6 tiêu chí (thêm `topic`: đúng chủ đề) → viết lại tối đa 2 lần → lưu DB (ideas, scripts, videos) → render. Nguồn không có thông tin thì bỏ ngay sau 1 lượt. ~1 phút/video.
+**Kết quả (2026-10-15):** xem packages/brain/README.md. Chủ đề → model lite đoán tên bài Wikipedia → lấy bài vi + en (giữ đoạn liên quan) → viết → kiểm tra bằng code (tự sửa icon, beat) → QA 6 tiêu chí (thêm `topic`: đúng chủ đề) → viết lại tối đa 2 lần → lưu DB (ideas, scripts, videos) → render. Nguồn không có thông tin thì bỏ ngay sau 1 lượt. ~1 phút/video.
 **Lưu ý hạn mức:** free tier của `gemini-3.8-flash` chỉ **20 lượt/ngày** (reset 0h giờ Thái Bình Dương). Mỗi video tốn 3–7 lượt, hết thì tự dùng `gemini-flash-lite-latest` (kịch bản kém hơn: hay viết ngắn, ít chia beat; code tự bù). Bảng `api_calls` lưu từng lượt gọi.
 
-### Phase 3 — Sources (tìm và chọn ý tưởng)
+### Phase 2b — Fun-fact kiểu kể chuyện — ✅ (2026-10-19)
+**Vấn đề:** người xem không biết đang nói về cái gì (vd video cọ biết đi, hoa xác chết không nói tên, không nói ở đâu), và câu chuyện chưa cuốn hút. Mẫu tham khảo: kênh *Siêu Nhân Heo Ú* (bí ẩn đời thường, đồ vật nhân hoá nói chuyện, 55s–1m30).
+
+**Kết quả:** người dùng duyệt 2 video mẫu (sữa heo, hành tây), chốt "từ sau làm theo hướng này".
+- **Fun-fact:**
+  - Có **nhân vật khách** (`guest`: icon + tên + giọng `nu`/`tram`/`be`) nói ít nhất 1/3 số câu.
+  - Mạch: hook → khách tự giới thiệu (tên + ở đâu) → hỏi/giải thích → bất ngờ → chốt → kêu gọi theo dõi.
+  - Dài 9–14 câu, 120–175 chữ (~45–60 giây). Phải đổi đơn vị sang hệ mét.
+- **Zodiac:** giữ một mình cua kể, 5–8 câu, phải gọi tên cung.
+- **QA:** thêm tiêu chí `essentials` (đủ tên, ở đâu, một con số). Tên khoa học không đọc, đưa vào mô tả YouTube (`📌`).
+- **Engine:**
+  - Layout `dialogue`, `speaker` cho từng câu, giọng khách riêng.
+  - Phụ đề trong ô màu theo người nói, bảng tên khách.
+- **Ý tưởng:** ưu tiên bí ẩn đời thường (đồ ăn, cơ thể, đồ trong nhà, con vật quen thuộc).
+
+**Để sau:** bối cảnh/nền phong phú hơn, nhiều kiểu cảnh hội thoại hơn. Tranh vẽ tay từng cảnh thì không làm được ở mức 0đ.
+
+### Phase 3 — Sources (tìm và chọn ý tưởng) — ✅ (2026-10-16)
 - Các crawler như trên; chuẩn hoá về `Idea {title, summary, sourceUrl, sourceText}`.
 - Chống trùng: so sánh với ý tưởng đã làm (hash + LLM so độ giống).
 - LLM chấm điểm theo ngách của kênh, khả năng viral, độ an toàn; chọn top N mỗi ngày.
@@ -166,20 +166,21 @@ viup/
 
 **Kết quả (2026-10-16):** `packages/brain/src/ideas.ts`. Không dùng crawler: Reddit chặn (403), "Did you know" của Wikipedia toàn chủ đề hẹp/chính trị. Thay bằng model lite brainstorm 12 ý tưởng/format theo nhóm chủ đề xoay vòng mỗi ngày, tự chấm (hợp kênh, viral, an toàn, có nguồn) → code lọc (an toàn < 5 hoặc khó kiểm chứng thì bỏ) và chống trùng (fingerprint + độ giống tập từ ≥ 0,7 so với 300 ý tưởng gần nhất). Fun-fact vẫn kiểm tra nguồn Wikipedia ở bước viết; không có nguồn thì lấy ý tưởng kế tiếp (tối đa 4 lần/ô). `npm run make -- --auto [--days N]` chia video theo tỉ lệ format của kênh, làm đủ cho ngày còn thiếu; `--ideas [--discover]` xem/sinh kho ý tưởng.
 
-### Phase 4 — Worker tự động end-to-end
+### Phase 4 — Worker tự động end-to-end — ✅ (2026-10-17)
 - Cron theo `Channel.schedule` → chuỗi job discover → select → script → QA → TTS → render → (upload).
 - Tự thử lại, log, cảnh báo khi lỗi liên tục (gửi tin Telegram, miễn phí).
 - Tự dọn file render cũ.
 - ✅ Xong khi: chạy 3 ngày liền tự ra video mỗi ngày, không can thiệp.
 
-**Kết quả (2026-10-17):** dùng systemd timer (user) thay vì worker chạy suốt — nhẹ, `Persistent=true` chạy bù khi máy bật lại. `worker/src/daily.ts` (`npm run daily`): `make --auto --days 2 --ahead 1` (đủ video hôm nay + mai, không làm dồn xa hơn), log `data/logs/<ngày>.log`, báo bằng notify-send (+ Telegram nếu có `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`), khoá chống chạy chồng, xoá `videos/<ngày>` cũ hơn 14 ngày (`VIUP_KEEP_DAYS`). `npm run daily:install` cài timer 7:00 và 15:30 (chạy bù sau khi hạn mức Gemini reset); `daily:uninstall` gỡ. Hàng đợi `jobs` + worker vẫn giữ cho Phase 5 (bấm nút trên web). Đang chờ chạy 3 ngày liền để xác nhận.
+**Kết quả (2026-10-17):** dùng systemd timer (user) thay vì worker chạy suốt — nhẹ, `Persistent=true` chạy bù khi máy bật lại. `worker/src/daily.ts` (`npm run daily`): `make --auto --days 2 --ahead 1` (đủ video hôm nay + mai, không làm dồn xa hơn), log `data/logs/<ngày>.log`, báo bằng notify-send (+ Telegram nếu có `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`), khoá chống chạy chồng, xoá `videos/<ngày>` cũ hơn 14 ngày (`VIUP_KEEP_DAYS`). `npm run daily:install` cài timer 7:00 và 15:30 (chạy bù sau khi hạn mức Gemini reset); `daily:uninstall` gỡ. Hàng đợi `jobs` + worker vẫn giữ cho Phase 5 (bấm nút trên web). Từ 2026-10-18 mỗi lần chạy còn đẩy nháp video hôm nay và cập nhật số liệu (Phase 6, 7):
+`make --auto --days 2 --ahead 1` → `publish drafts <hôm nay>` → `publish stats`.
 
-### Phase 5 — Webapp dashboard
+### Phase 5 — Webapp dashboard — ✅ (2026-10-17)
 - Quản lý kênh: ngách, giọng, nhân vật, lịch, số video/ngày, nút tạm dừng khẩn cấp.
 - Trạng thái pipeline, danh sách video kèm player xem lại, log lỗi, mức dùng API.
 - ✅ Xong khi: mọi cấu hình đều chỉnh được trên web, không phải sửa file.
 
-**Kết quả (2026-10-17):** app desktop "viup" (`npm run app:install`: build Next, service systemd `viup-web` ở 127.0.0.1:3210, `~/.local/bin/viup` mở bằng `omarchy-launch-webapp`, file .desktop + icon). Tab Video (theo ngày: xem video, copy caption, đánh dấu đã đăng từng nền tảng → `videos/<ngày>/posted.json`, xoá video không ưng), Ý tưởng (thêm chủ đề tay — điểm 99 làm trước, bỏ ý tưởng, nghĩ thêm), Cài đặt (số video/ngày, tỉ lệ format, tạm dừng hẹn giờ), Nhật ký; nút "Làm video ngay". Sửa code giao diện xong phải chạy lại `npm run app:install`.
+**Kết quả (2026-10-17):** app desktop "viup" (`npm run app:install`: build Next, service systemd `viup-web` ở 127.0.0.1:3210, `~/.local/bin/viup` mở bằng `omarchy-launch-webapp`, file .desktop + icon). Tab Video (theo ngày: xem video, copy caption, đánh dấu đã đăng từng nền tảng → `videos/<ngày>/posted.json`, xoá video không ưng), Ý tưởng (thêm chủ đề tay — điểm 99 làm trước, bỏ ý tưởng, nghĩ thêm), Cài đặt (số video/ngày, tỉ lệ format, tạm dừng hẹn giờ), Nhật ký; nút "Làm video ngay". Sửa code giao diện xong phải chạy lại `npm run app:install`. Bổ sung 2026-10-18: badge trạng thái nháp từng video, nút "Đẩy nháp ngay", công tắc đẩy nháp TikTok/YouTube trong Cài đặt, tab **Thống kê**.
 
 ### Phase 6 — Publish
 - YouTube Data API (`videos.insert`), Facebook Graph API (Reels lên Page), TikTok Content Posting API.
@@ -187,17 +188,37 @@ viup/
 - Bật cờ **"nội dung tạo bằng AI"** mà các API hỗ trợ; đăng đúng giờ vàng theo lịch.
 - ✅ Xong khi: video tự đăng công khai trên ít nhất 1 nền tảng.
 
+**Kết quả (2026-10-18), bán tự động:** `packages/publish/src/drafts.ts` (`npm run drafts`).
+- Mỗi ngày tool tự đẩy 3 video hôm nay:
+  - vào **hộp nháp TikTok** (Sandbox, đẩy được khoảng 5 nháp/24h nên chỉ đẩy video hôm nay);
+  - lên **YouTube ở chế độ riêng tư**.
+- Tiêu đề, caption và hashtag lấy từ file `.txt` (`captions.ts`).
+- Người dùng tự bấm đăng vào giờ muốn. Video YouTube upload qua API **không bị khoá**: người dùng đã chuyển sang công khai được.
+- Kết quả từng video ghi ở `videos/<ngày>/uploads.json`. Lỗi thì lần chạy sau thử lại; YouTube trả 409 thì tự thử lại tối đa 3 lần.
+- **Facebook** đăng tay, vì tài khoản quá mới để đăng ký Meta developer (thử lại sau 1–2 tuần kể từ 2026-10-17).
+- Chưa làm: tự đăng công khai theo giờ.
+
 ### Phase 7 — Vòng phản hồi
 - Mỗi ngày kéo số liệu view, retention, like → lưu vào `Metrics`.
 - Đưa chủ đề và kiểu hook hiệu quả vào prompt chấm ý tưởng và viết kịch bản.
+
+**Đã có (2026-10-18):** `packages/publish/src/stats.ts` (`npm run stats`, chạy trong mỗi lần daily) lưu `data/stats.json`.
+- **YouTube:** lấy lượt xem, thích, bình luận của các video trên kênh.
+- **TikTok:** cần thêm product *Display API* (scope `video.list`) trong TikTok developer portal, rồi chạy `npm run tt:auth`. Hiện còn lỗi `scope_not_authorized`.
+- Tab **Thống kê** trong app:
+  - tổng lượt xem theo nền tảng;
+  - lượt xem theo khung giờ đăng (giờ VN, chỉ tính video đã đăng hơn 48h) kèm gợi ý giờ đăng;
+  - so sánh 2 định dạng;
+  - bảng từng video với tỉ lệ tương tác.
+- **Chưa làm:** retention, tự đưa kết quả vào prompt, tự chỉnh tỉ lệ format.
 
 ---
 
 ## 4. Rủi ro cần biết trước
 
 - **Đăng qua API bị giới hạn khi chưa audit:**
-  - YouTube: video upload từ project API chưa được xác minh **bị khoá ở chế độ riêng tư**.
-  - TikTok: client chưa audit chỉ đăng được riêng tư, hoặc gửi vào **hộp nháp** để bạn bấm đăng.
+  - YouTube: theo chính sách, video upload từ project API chưa xác minh có thể **bị khoá ở chế độ riêng tư**. Thực tế 2026-10-18: video của kênh vẫn chuyển sang công khai được.
+  - TikTok: client chưa audit chỉ đăng được riêng tư, hoặc gửi vào **hộp nháp** để bạn bấm đăng (đang dùng cách này).
   - Vì vậy phải nộp audit từ Phase 0. Trong lúc chờ, tool vẫn sản xuất video, chỉ khâu đăng là tạm thời bán tự động.
 - **Chính sách kiếm tiền:** YouTube hạn chế nội dung "sản xuất hàng loạt / lặp lại". Pipeline giảm rủi ro bằng: nhân vật riêng, nhiều template, QA chống chép, gắn nhãn AI, và không đăng quá dày (khởi đầu 1–3 video/ngày/kênh).
 - **edge-tts** là API không chính thức của Microsoft, có thể đổi bất cứ lúc nào. Luôn giữ Gemini TTS làm phương án dự phòng.

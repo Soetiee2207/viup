@@ -1,6 +1,16 @@
 # Đăng ký API (làm sớm — duyệt audit mất nhiều tuần)
 
-Khi chưa qua audit, video đăng bằng API của **YouTube và TikTok bị khoá ở chế độ riêng tư**. Các bước tạo app làm ngay được; riêng nộp audit cần trang pháp lý và video demo (xem mục 0).
+Khi chưa qua audit, video đăng bằng API của **YouTube và TikTok có thể bị khoá ở chế độ riêng tư**. Các bước tạo app làm ngay được; riêng nộp audit cần trang pháp lý và video demo (xem mục 0).
+
+**Trạng thái (2026-10-19):**
+
+| Dịch vụ | Trạng thái |
+|---|---|
+| Gemini | ✅ Đang dùng |
+| YouTube | ✅ OAuth + upload riêng tư. Video vẫn chuyển sang công khai được. Audit đang chờ. |
+| TikTok | ✅ Sandbox, đẩy được vào hộp nháp. Số liệu cần bật thêm Display API (mục 3, bước 3). |
+| Facebook | ⏳ Tài khoản quá mới để đăng ký Meta developer, nên đang đăng tay |
+| Telegram | Tuỳ chọn |
 
 Nên dùng **một tài khoản Google/TikTok/Facebook riêng cho kênh** (không phải tài khoản cá nhân chính).
 
@@ -30,7 +40,7 @@ Cả YouTube và TikTok đều đòi app có **trang web công khai** gồm *Ch�
    - *App domain*: điền link trang chủ, privacy policy, terms (bước 0.2).
    - *Data access / Scopes*: thêm `https://www.googleapis.com/auth/youtube.upload` (và `youtube.readonly` để đọc số liệu ở Phase 7).
    - *Audience*: thêm email kênh vào **Test users**.
-4. *Clients → Create client* → loại **Desktop app** → tải JSON, lưu thành `secrets/youtube_client.json` (thư mục này sẽ được gitignore, **không bao giờ commit**).
+4. *Clients → Create client* → loại **Desktop app** → tải JSON, lưu thành `secrets/youtube_client.json` (thư mục này sẽ được gitignore, **không bao giờ commit**). Sau đó chạy `npm run yt:auth` để đăng nhập (token lưu trong `secrets/`).
 5. **Lưu ý quan trọng:** khi app ở trạng thái *Testing*, refresh token **hết hạn sau 7 ngày**, nên tool tự động sẽ mất quyền đăng mỗi tuần. Khi luồng upload đã chạy ổn, bấm **Publish app** sang *In production*. Màn hình đăng nhập sẽ hiện cảnh báo "app chưa xác minh"; vì chỉ mình bạn dùng nên bấm *Advanced → Go to viup* là được.
 
 **B. Nộp audit (sau khi có video demo)**
@@ -55,15 +65,15 @@ Cả YouTube và TikTok đều đòi app có **trang web công khai** gồm *Ch�
 **Các bước**
 1. https://developers.tiktok.com → đăng nhập → *Manage apps → Connect an app*. Loại: cá nhân/nhà phát triển.
 2. Điền app: tên `viup`, icon (dùng ảnh chú cua), mô tả, category, link **Terms** và **Privacy Policy** (bước 0.2).
-3. *Add products*: **Login Kit** và **Content Posting API**. Bật *Direct Post* chỉ khi muốn thử audit.
-4. Scopes: `user.info.basic`, `video.upload` (nháp). Thêm `video.publish` nếu thử Direct Post.
+3. *Add products*: **Login Kit**, **Content Posting API** và **Display API** (Display API dùng để lấy lượt xem cho tab Thống kê). Bật *Direct Post* chỉ khi muốn thử audit.
+4. Scopes: `user.info.basic`, `video.upload` (nháp), `video.list` (số liệu). Thêm `video.publish` nếu thử Direct Post. Client key/secret lưu vào file trong `secrets/` (tự điền, không dán vào chat), rồi chạy `npm run tt:auth`. **Mỗi lần thêm scope phải chạy lại `npm run tt:auth`.**
 5. **Verify URL properties**: xác minh domain hoặc URL prefix của trang GitHub Pages (TikTok cho tải một file chữ ký lên trang).
 6. Thêm tài khoản TikTok của kênh vào *Sandbox / Target users* để thử khi chưa duyệt.
 7. **Submit for review**: giải thích từng product và scope dùng để làm gì, và đính kèm **video demo** quay toàn bộ luồng: đăng nhập TikTok → tool gửi video → video xuất hiện trong hộp nháp hoặc được đăng.
 8. Theo dõi email. TikTok thường phản hồi vài vòng. Mỗi lần thay đổi app sau khi được duyệt đều phải nộp duyệt lại.
 
-## 4. Facebook (Reels lên Page) (Phase 6)
-1. Tạo **Facebook Page** cho kênh.
+## 4. Facebook (Reels lên Page) (Phase 6) — chưa làm
+1. ✅ Đã tạo **Facebook Page** cho kênh (2026-10-17). Đăng ký Meta developer bị chặn vì tài khoản quá mới, nên thử lại sau 1–2 tuần.
 2. https://developers.facebook.com → tạo app loại Business → thêm quyền `pages_manage_posts`, `pages_read_engagement`, `pages_show_list`.
 3. Với Page của chính bạn (bạn là admin app), chế độ development thường đủ để thử; khi chạy lâu dài nên làm App Review.
 

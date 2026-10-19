@@ -1,80 +1,81 @@
 # viup
 
-> Webapp tự động hoá quy trình làm video ngắn cho **YouTube Shorts**, **Facebook Reels** và **TikTok**: từ tìm ý tưởng → viết kịch bản → tạo giọng đọc và hình ảnh/video bằng AI → dựng video → (sau này) tự đăng.
+> Tool **tự động 100%** làm video Short hoạt hình 2D tiếng Việt cho kênh **Crab vibe** (mascot: chú cua Cự Giải): tự chọn chủ đề → viết kịch bản → tự kiểm duyệt → giọng đọc → dựng video → đẩy nháp lên TikTok + YouTube → thống kê hiệu quả.
 
 ## Giới thiệu
 
-viup nhắm tới người làm content video ngắn muốn giảm thời gian sản xuất nhưng vẫn giữ quyền kiểm soát nội dung. Đầu vào là dữ liệu crawl từ các nguồn trending, đầu ra là video dọc **9:16, dài 15–60 giây**, có nhân vật hoặc hình ảnh minh hoạ đủ sinh động, kèm phụ đề, nhạc nền, tiêu đề và hashtag.
+Máy tự chạy mỗi ngày (7:00 và 15:30), làm **3 video/ngày**, dọc **9:16, dài khoảng 30–60 giây**. Không có bước duyệt tay; mọi nội dung AI đều phải qua QA tự động. Người dùng chỉ việc mở app TikTok hoặc YouTube Studio và bấm **Đăng** vào giờ mình muốn.
+
+Có 2 định dạng nội dung (tỉ lệ chỉnh được trong app, mặc định 60/40):
+
+| Định dạng | Kiểu video | Nguồn |
+|---|---|---|
+| `fun-fact`: sự thật thú vị | **Kể chuyện**: Cua nói chuyện với một nhân vật khách được nhân hoá (vd hạt mưa, con mèo), 2 giọng. Chủ đề là bí ẩn đời thường. Video phải nói rõ tên, ở đâu và một con số. | Wikipedia (vi + en) |
+| `zodiac`: cung hoàng đạo | Cua kể một mình, có gọi tên cung và ngày sinh | LLM, không cần nguồn |
 
 ## Pipeline
 
 ```
-Crawl & Trend ─▶ Lọc / chọn ý tưởng ─▶ Viết kịch bản (LLM) ─▶ Giọng đọc (TTS)
-                                                                   │
-        Đăng ◀── Duyệt thủ công ◀── Dựng & phụ đề ◀── Hình ảnh / Video (AI)
+Kho ý tưởng (Gemini brainstorm + chấm + chống trùng)
+  → Nguồn Wikipedia → Viết kịch bản (Gemini, JSON) → Kiểm tra bằng code → QA bằng LLM (viết lại ≤ 2 lần)
+  → Giọng đọc edge-tts (mốc từng từ) → Dựng video bằng code (Remotion) → videos/<ngày>/N-slug.mp4 + .txt caption
+  → Nháp TikTok + YouTube riêng tư → Thống kê lượt xem / giờ đăng
 ```
 
-## Các module dự kiến
+## Chi phí ≈ 0đ
 
-| Module | Vai trò | Công nghệ dự kiến |
-|---|---|---|
-| **Nguồn dữ liệu** | Tìm chủ đề đang hot, thu thập thông tin | Google Trends, YouTube Data API, Reddit, RSS/báo, TikTok Creative Center |
-| **Kịch bản** | Viết script có hook 3 giây đầu, thân bài, CTA; sinh tiêu đề, mô tả, hashtag | Gemini API |
-| **Giọng đọc** | Chuyển kịch bản thành voice-over (có tiếng Việt) | edge-tts (miễn phí); sau này Gemini TTS / ElevenLabs |
-| **Nhân vật 2D** | Nhân vật/sự vật 2D vẽ một lần bằng Gemini, tái sử dụng cho mọi video (luôn nhất quán) | Gemini image (gói Pro) |
-| **Hoạt hình & dựng video** | Chớp mắt, nhép miệng theo giọng, biểu cảm, chuyển động; phụ đề; xuất 9:16 | Remotion (React → MP4), FFmpeg |
-| **Video AI (tuỳ chọn)** | Thỉnh thoảng một cảnh đặc biệt | Veo / Flow (tốn credits) |
-| **Đăng bài** | Upload và lên lịch đa nền tảng | YouTube Data API, Facebook Graph API, TikTok Content Posting API |
-| **Webapp** | Dashboard quản lý ý tưởng, duyệt kịch bản, preview video, lịch đăng | xem phần Tech stack |
+| Phần | Dùng gì |
+|---|---|
+| Kịch bản, ý tưởng, QA, hashtag | Gemini API free tier (AI Studio) |
+| Giọng đọc | edge-tts (giọng Microsoft, miễn phí) |
+| Hoạt hình | Code: Remotion + icon Fluent Emoji (MIT), nhân vật cua vẽ 1 lần bằng Gemini app |
+| Nhạc nền, SFX | Tự tổng hợp bằng code nên không dính bản quyền |
+| Chạy hằng ngày | systemd timer trên máy nhà |
 
-## Tận dụng gói Google AI Pro
-
-- Gói **Google AI Pro** cho phép dùng Gemini, **Veo / Flow**, Whisk… **qua giao diện web/app** (có hạn mức theo ngày/tháng). Rất hợp cho giai đoạn đầu: làm tay hoặc bán tự động các cảnh video AI.
-- Gói Pro **không bao gồm quyền gọi API**. Muốn tự động hoá hoàn toàn cần API key từ **Google AI Studio** hoặc **Vertex AI**:
-  - Gemini (text, TTS) có free tier — đủ để làm kịch bản và giọng đọc ở giai đoạn MVP.
-  - Veo / Imagen qua API được tính phí riêng theo lượng sử dụng.
-- **Chiến lược đề xuất:** MVP dùng Gemini API free tier cho kịch bản + TTS; cảnh video AI tạo thủ công trên Flow bằng gói Pro rồi đưa vào viup để dựng; khi kênh có doanh thu mới chuyển sang Veo API để tự động hoá toàn bộ.
-
-## Hướng hình ảnh: hoạt hình 2D "cắt ghép"
-
-Thay vì tạo cả video bằng AI (tốn credits, nhân vật khó nhất quán), viup dùng **nhân vật 2D vẽ một lần** bằng Gemini (mặt để trống) và **code tự làm chuyển động**: thở, chớp mắt, miệng nhép theo độ to giọng đọc, nảy/nhảy/lắc theo cảm xúc từng câu. Chi phí mỗi video ≈ 0đ, tự động hoá hoàn toàn, không giới hạn số lượng.
-
-👉 Mascot: **chú cua Cự Giải**. Engine video: [`packages/video/`](packages/video/) — prompt vẽ nhân vật: [docs/GEMINI_PROMPTS.md](docs/GEMINI_PROMPTS.md).
+Gói Google AI Pro **không có API**, nên chỉ dùng tay một lần để vẽ nhân vật ([docs/GEMINI_PROMPTS.md](docs/GEMINI_PROMPTS.md)).
 
 ## Bắt đầu
 
-Cần Node.js ≥ 23, [uv](https://docs.astral.sh/uv/), ffmpeg.
+Cần Node.js ≥ 23, [uv](https://docs.astral.sh/uv/) và ffmpeg. Thêm `GEMINI_API_KEY=...` vào file `.env` (xem [docs/SETUP_APIS.md](docs/SETUP_APIS.md)).
 
 ```bash
 npm install
-npm run dev     # dashboard http://localhost:3210 + worker
+npm run make -- "vì sao mèo thích hộp giấy"   # làm thử 1 video
+npm run daily:install                          # hẹn giờ chạy hằng ngày 7:00 + 15:30
+npm run app:install                            # cài app desktop "viup" (http://localhost:3210)
 ```
 
-Kế hoạch chi tiết: [docs/PLAN.md](docs/PLAN.md) · Đăng ký API: [docs/SETUP_APIS.md](docs/SETUP_APIS.md)
+Các lệnh còn lại xem trong [CLAUDE.md](CLAUDE.md).
 
-## Tech stack đề xuất (chưa chốt)
+## Cấu trúc
 
-- **Backend:** Python + FastAPI — hệ sinh thái mạnh cho crawl, AI và xử lý video (FFmpeg).
-- **Frontend:** Next.js / React — dùng chung React với Remotion để preview video ngay trên web.
-- **Database:** SQLite cho bản đầu, chuyển sang PostgreSQL khi cần.
-- **Job queue:** background task đơn giản → Celery / RQ khi pipeline nặng hơn.
+| Thư mục | Vai trò |
+|---|---|
+| `packages/brain` | Chủ đề → kịch bản (VideoSpec): ý tưởng, nguồn, viết, QA, caption ([README](packages/brain/README.md)) |
+| `packages/video` | Scene engine Remotion: VideoSpec → MP4 1080×1920 ([README](packages/video/README.md)) |
+| `packages/publish` | YouTube / TikTok: OAuth, upload nháp, lấy số liệu |
+| `packages/core` | SQLite + Drizzle, hàng đợi job, đọc thư mục `videos/` |
+| `worker` | `daily.ts` chạy hằng ngày (làm video → đẩy nháp → số liệu) |
+| `apps/web` | App viup: video theo ngày, Thống kê, Ý tưởng, Cài đặt, Nhật ký |
+| `tools/` | TTS (edge-tts), nhạc/SFX, xoá nền ảnh |
+| `site/` | Trang chủ, Privacy, Terms trên GitHub Pages (phục vụ audit) |
 
-## Roadmap
+## Trạng thái (2026-10-19)
 
-- [x] **Prototype** – kịch bản → giọng đọc → nhân vật 2D hoạt hình + phụ đề → MP4.
-- [x] **Phase 0** – Monorepo, SQLite + hàng đợi job, worker, dashboard.
-- [ ] **Phase 1** – Crawl trend + sinh kịch bản, hiển thị và chỉnh sửa trên webapp.
-- [ ] **Phase 2** – Nhiều nhân vật/cảnh, nhạc nền, phụ đề khớp từng từ, render từ webapp.
-- [ ] **Phase 3** – Tuỳ chọn chèn cảnh video AI (Veo).
-- [ ] **Phase 4** – Lên lịch & tự đăng đa nền tảng, thống kê hiệu quả (view, retention).
+- [x] Phase 0: monorepo, DB, hàng đợi job.
+- [x] Phase 1: scene engine (cắt cảnh nhanh, đồ vật biết nói, máy quay, SFX, phụ đề từng từ).
+- [x] Phase 2: brain (viết + QA tự động).
+- [x] Phase 3: kho ý tưởng, `make --auto`.
+- [x] Phase 4: chạy hằng ngày bằng systemd timer.
+- [x] Phase 5: app desktop viup.
+- [~] Phase 6: tự đẩy **nháp** TikTok + YouTube riêng tư; người dùng bấm đăng. Facebook đăng tay (tài khoản quá mới để đăng ký Meta developer).
+- [~] Phase 7: trang Thống kê (lượt xem theo giờ đăng và theo định dạng). Số liệu TikTok cần bật Display API. Chưa tự học lại vào prompt.
+- [x] 2026-10-19: fun-fact chuyển sang kiểu **kể chuyện có nhân vật khách**.
 
-## Lưu ý về chính sách nền tảng
+Chi tiết: [docs/PLAN.md](docs/PLAN.md).
 
-- **YouTube** hạn chế kiếm tiền với nội dung "mass-produced" / lặp lại / thiếu giá trị riêng — mỗi video nên có góc nhìn, biên tập hoặc giá trị gia tăng thật sự.
-- **YouTube, TikTok, Facebook** yêu cầu gắn nhãn nội dung được tạo bằng AI trông giống thật.
-- Tôn trọng **bản quyền** của nguồn crawl (văn bản, hình ảnh, nhạc): dùng dữ liệu làm cảm hứng/thông tin, không re-up nguyên văn.
-- Vì vậy pipeline luôn có bước **duyệt thủ công** trước khi đăng.
+## Lưu ý chính sách nền tảng
 
-## Trạng thái
-
-🚧 Đang phát triển — xong Phase 0 (khung dự án), tiếp theo Phase 1 (video engine v2).
+- **YouTube** hạn chế kiếm tiền với nội dung "sản xuất hàng loạt". Kênh giảm rủi ro bằng: mascot riêng, kịch bản viết lại (QA chống chép nguyên văn), không đăng quá dày.
+- **Gắn nhãn nội dung AI** khi đăng (file caption có nhắc).
+- **Bản quyền:** chỉ dùng nguồn làm thông tin; nhạc và SFX tự tổng hợp; icon có license MIT.
