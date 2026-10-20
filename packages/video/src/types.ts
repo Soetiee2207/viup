@@ -59,6 +59,8 @@ export type Line = {
 export type Manifest = {
 	fps: number;
 	duration: number;
+	// Tiêu đề video (render.ts chép từ spec.title) -> chữ trên ảnh bìa
+	title?: string | null;
 	hook?: string | null;
 	music?: string | null;
 	guest?: Guest | null;
@@ -77,7 +79,7 @@ export type SpecLine = {
 };
 
 export type VideoSpec = {
-	// Tiêu đề khi đăng (engine không dùng)
+	// Tiêu đề khi đăng, cũng là chữ trên ảnh bìa (src/Cover.tsx)
 	title?: string;
 	hook?: string;
 	music?: string;

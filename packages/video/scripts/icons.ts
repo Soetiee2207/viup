@@ -30,6 +30,8 @@ if (command === 'search') {
 			[l.props, ...(l.beats ?? []).map((b) => b.props)].flatMap((ps) => (ps ?? []).map((p) => p.icon)),
 		),
 	);
+	// Nhân vật khách (cảnh đối thoại + ảnh bìa) có thể không nằm trong props của câu nào
+	if (manifest.guest?.icon) used.add(manifest.guest.icon);
 	const missing = [...used].filter((n) => !set.icons[n]);
 	if (missing.length) {
 		console.error(`Icon không tồn tại: ${missing.join(', ')} — tìm tên đúng bằng: node scripts/icons.ts search <từ khoá>`);

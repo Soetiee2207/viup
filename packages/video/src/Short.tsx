@@ -1,6 +1,7 @@
 import React, {useMemo} from 'react';
 import {AbsoluteFill, Audio, Easing, interpolate, random, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {z} from 'zod';
+import {Cover} from './Cover';
 import {Scene, stickerText, type CrabConfig} from './Scene';
 import {Subtitle} from './Subtitle';
 import {buildTimeline, type Scene as SceneData} from './timeline';
@@ -27,6 +28,8 @@ export const shortSchema = z.object({
 export type ShortProps = z.infer<typeof shortSchema> & {manifest?: Manifest};
 
 const TRANSITION_FRAMES = 8;
+// Vài khung hình đầu là ảnh bìa: TikTok/YouTube lấy khung đầu làm thumbnail mặc định
+export const COVER_FRAMES = 2;
 
 // Độ to giọng xung quanh khung hình (cho ducking)
 const talkingNear = (envelope: number[], frame: number, radius: number) => {
@@ -135,6 +138,7 @@ export const Short: React.FC<ShortProps> = ({manifest, ...p}) => {
 					/>
 				</Sequence>
 			))}
+			{frame < COVER_FRAMES && manifest.title && <Cover title={manifest.title} crab={crab} guest={manifest.guest} />}
 		</AbsoluteFill>
 	);
 };

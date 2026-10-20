@@ -6,6 +6,7 @@
 - Đồ vật (icon Fluent Emoji Flat, MIT) có mắt và miệng biết nhép.
 - Chú cua tham gia trong cảnh.
 - SFX tự tổng hợp, tiêu đề hook đầu video, phụ đề khớp từng từ.
+- Ảnh bìa (`src/Cover.tsx`): cua + `title` của spec, đặt ở 2 khung hình đầu (TikTok/YouTube lấy khung đầu làm thumbnail) và xuất thêm `<tên video>.jpg`.
 - Có thể có **nhân vật khách** (`guest`) nói chuyện với cua bằng giọng riêng (video kể chuyện).
 
 Kịch bản do `packages/brain` sinh (Gemini API free tier). Chi phí dựng video 0đ:
@@ -86,7 +87,8 @@ spec.json             kịch bản mẫu (VideoSpec)
 scripts/render.ts     spec -> giọng đọc -> icon -> SFX/nhạc -> MP4 hoặc stills
 scripts/icons.ts      tìm icon + trích icon dùng trong video ra public/icons/
 src/timeline.ts       chia câu thành beat theo mốc từng từ, chọn mặc định (bố cục, nền, chuyển cảnh, SFX)
-src/Short.tsx         ghép cảnh + chuyển cảnh, hook, phụ đề, nhạc + ducking, SFX
+src/Short.tsx         ghép cảnh + chuyển cảnh, hook, phụ đề, nhạc + ducking, SFX, ảnh bìa ở khung đầu
+src/Cover.tsx         ảnh bìa: câu hỏi (title) + cua (+ nhân vật khách)
 src/Scene.tsx         một cảnh: máy quay (Ken Burns, zoom-punch, lắc) + 6 bố cục (kể cả dialogue) + nhãn
 src/Background.tsx    nền động burst / speedlines / bokeh / gloom, màu theo cảm xúc
 src/Prop.tsx          đồ vật biết nói (mắt, miệng, chớp mắt) + bảng toạ độ mặt icon

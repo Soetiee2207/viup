@@ -77,6 +77,13 @@ if (fresh && !values['force-voice']) console.log('Giọng đọc đã khớp spe
 else if (!values['force-voice'] && patchable()) console.log('Lời thoại không đổi, chỉ cập nhật beat/hình trong manifest');
 else run('uv', ['run', '../../tools/tts/make_voice.py', spec, '--out', 'public', '--voice', values.voice, `--rate=${values.rate}`]);
 
+// Tiêu đề (chữ trên ảnh bìa) không ảnh hưởng giọng đọc -> chép thẳng vào manifest
+{
+	const m = readManifest();
+	const title = spec.endsWith('.json') ? (JSON.parse(readFileSync(spec, 'utf8')).title ?? null) : null;
+	if (m.title !== title) writeFileSync('public/manifest.json', JSON.stringify({...m, title}));
+}
+
 // 2. Icon minh hoạ
 run('node', ['scripts/icons.ts', 'sync']);
 if (values['voice-only']) process.exit(0);
@@ -93,9 +100,10 @@ if (!existsSync(`public/${music}`)) {
 	run('uv', ['run', '../../tools/music/make_loop.py', `public/${music}`, '--seed', '1']);
 }
 
-// 4. Render
+// 4. Render. Khung hình 0 là ảnh bìa (src/Cover.tsx) -> xuất thêm <tên video>.jpg
 if (!values.stills) {
 	run('npx', ['remotion', 'render', 'Short', values.out]);
+	if (manifest.title) run('npx', ['remotion', 'still', 'Short', values.out.replace(/\.mp4$/, '.jpg'), '--frame=0', '--image-format=jpeg']);
 	process.exit(0);
 }
 
@@ -106,8 +114,8 @@ const composition = await selectComposition({serveUrl, id: 'Short'});
 const {scenes} = buildTimeline(manifest, composition.durationInFrames);
 const frames = values.frames
 	? values.frames.split(',').map(Number)
-	: // Mỗi cảnh lấy 1 khung hình sau khi hoạt ảnh vào đã xong
-		scenes.map((s) => Math.min(s.to - 1, s.from + Math.max(10, Math.round((s.to - s.from) * 0.6))));
+	: // Ảnh bìa (khung 0) + mỗi cảnh 1 khung hình sau khi hoạt ảnh vào đã xong
+		[...(manifest.title ? [0] : []), ...scenes.map((s) => Math.min(s.to - 1, s.from + Math.max(10, Math.round((s.to - s.from) * 0.6))))];
 rmSync('out/stills', {recursive: true, force: true});
 mkdirSync('out/stills', {recursive: true});
 for (const [k, frame] of frames.entries()) {
